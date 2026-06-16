@@ -209,20 +209,21 @@ hr {{ border-color: {C['border']} !important; margin: 1.2rem 0 !important; }}
 
 /* ── Winner card ── */
 .winner-card {{
-    background: {C['card']};
-    border: 1px solid {C['border2']};
-    border-left: 3px solid {C['accent']};
-    border-radius: 8px;
+    background: rgba(22,22,26,0.82);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border: none;
+    border-radius: 12px;
     padding: 20px 24px;
     display: flex;
     align-items: center;
     gap: 28px;
-    margin-bottom: 24px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
 }}
 .winner-flag {{ font-size: 3rem; line-height: 1; flex-shrink: 0; }}
 .winner-rank {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: {C['accent']}; margin-bottom: 3px; }}
 .winner-name {{ font-size: 1.6rem; font-weight: 300; color: {C['text']}; letter-spacing: .02em; line-height: 1.1; }}
-.winner-pct  {{ font-size: 2.8rem; font-weight: 700; color: {C['text']}; font-family:'JetBrains Mono',monospace; line-height: 1; }}
+.winner-pct  {{ font-size: 2.8rem; font-weight: 700; color: {C['text']}; font-family:'JetBrains Mono',monospace; line-height: 1; animation: neonPulse 3s ease-in-out infinite; }}
 .winner-sub  {{ font-size: 10px; color: {C['sub']}; text-transform: uppercase; letter-spacing: .07em; margin-top: 2px; }}
 .winner-bar-track {{
     height: 4px;
@@ -239,27 +240,45 @@ hr {{ border-color: {C['border']} !important; margin: 1.2rem 0 !important; }}
 
 /* ── Top-5 cards ── */
 .prob-card {{
-    background: {C['card']};
-    border: 1px solid {C['border']};
-    border-radius: 8px;
+    background: rgba(28,28,33,0.65);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 12px;
     padding: 16px;
     height: 100%;
+    transition: transform 0.28s cubic-bezier(.22,1,.36,1),
+                box-shadow 0.28s ease, border-color 0.28s ease;
+}}
+.prob-card:hover {{
+    transform: translateY(-5px) scale(1.015);
+    border-color: rgba(79,158,255,0.4);
+    box-shadow: 0 16px 44px rgba(0,0,0,.55), 0 0 0 1px rgba(79,158,255,0.1);
 }}
 .prob-card-rank  {{ font-size: 10px; font-weight: 700; color: {C['sub']}; text-transform: uppercase; letter-spacing: .1em; }}
 .prob-card-flag  {{ font-size: 2rem; line-height: 1.2; display: block; margin: 6px 0 4px; }}
 .prob-card-name  {{ font-size: 13px; font-weight: 500; color: {C['text']}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-.prob-card-pct   {{ font-size: 1.5rem; font-weight: 700; color: {C['text']}; font-family:'JetBrains Mono',monospace; margin: 4px 0 2px; }}
+.prob-card-pct   {{ font-size: 1.5rem; font-weight: 700; color: {C['text']}; font-family:'JetBrains Mono',monospace; margin: 4px 0 2px; text-shadow: 0 0 18px rgba(79,158,255,.55), 0 0 36px rgba(79,158,255,.22); }}
 .prob-card-label {{ font-size: 9px; color: {C['sub']}; text-transform: uppercase; letter-spacing: .07em; }}
 .prob-card-bar-track {{ height: 3px; background: rgba(255,255,255,0.07); border-radius:2px; margin-top:10px; overflow:hidden; }}
 .prob-card-bar-fill  {{ height:100%; border-radius:2px; }}
 
 /* ── Match card ── */
 .match-card {{
-    background: {C['card']};
-    border: 1px solid {C['border']};
-    border-radius: 8px;
+    background: rgba(28,28,33,0.65);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
     padding: 18px 20px;
     margin-bottom: 10px;
+    transition: transform 0.25s cubic-bezier(.22,1,.36,1),
+                box-shadow 0.25s ease, border-color 0.25s ease;
+}}
+.match-card:hover {{
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(0,0,0,.45);
+    border-color: rgba(255,255,255,0.14);
 }}
 .match-row {{
     display: flex;
@@ -340,6 +359,14 @@ hr {{ border-color: {C['border']} !important; margin: 1.2rem 0 !important; }}
   25%     {{ transform:translate(-2px,1px) scale(1.06); }}
   50%     {{ transform:translate(1px,-2px) scale(1.06); }}
   75%     {{ transform:translate(-1px,-1px) scale(1.06); }}
+}}
+@keyframes neonPulse {{
+  0%,100% {{ text-shadow: 0 0 18px rgba(79,158,255,.7),  0 0 42px rgba(79,158,255,.3); }}
+  50%     {{ text-shadow: 0 0 28px rgba(79,158,255,1.0), 0 0 70px rgba(79,158,255,.5), 0 0 110px rgba(79,158,255,.2); }}
+}}
+@keyframes borderSpin {{
+  0%,100% {{ background-position: 0% 50%; }}
+  50%     {{ background-position: 100% 50%; }}
 }}
 
 /* ── Animation utilities ── */
@@ -890,8 +917,28 @@ def _fetch_wiki_photo(name: str) -> str | None:
         pass
     return None
 
+_FLAG_ISO = {
+    "France":"fr",      "Spain":"es",       "Portugal":"pt",     "England":"gb-eng",
+    "Germany":"de",     "Brazil":"br",      "Argentina":"ar",    "Netherlands":"nl",
+    "Belgium":"be",     "Croatia":"hr",     "Morocco":"ma",      "Uruguay":"uy",
+    "Switzerland":"ch", "Japan":"jp",       "USA":"us",          "Colombia":"co",
+    "South Korea":"kr", "Mexico":"mx",      "Canada":"ca",       "Ecuador":"ec",
+    "Senegal":"sn",     "Norway":"no",      "Austria":"at",      "Turkey":"tr",
+    "Australia":"au",   "Saudi Arabia":"sa","Iran":"ir",         "Egypt":"eg",
+    "Ghana":"gh",       "Tunisia":"tn",     "Paraguay":"py",     "Sweden":"se",
+    "Scotland":"gb-sct","Ivory Coast":"ci", "Czechia":"cz",      "Bosnia":"ba",
+    "Qatar":"qa",       "Haiti":"ht",       "Algeria":"dz",      "Jordan":"jo",
+    "Iraq":"iq",        "Curacao":"cw",     "New Zealand":"nz",  "South Africa":"za",
+    "Congo DR":"cd",    "Uzbekistan":"uz",  "Cabo Verde":"cv",   "Panama":"pa",
+}
+
 def flag_html(team, size="1.8rem"):
-    """Return flag at a consistent size — no special-casing for ENG/SCO."""
+    """Return real country flag image (flagcdn.com) or emoji fallback."""
+    iso = _FLAG_ISO.get(team)
+    if iso:
+        return (f'<img src="https://flagcdn.com/w80/{iso}.png" alt="{team}" '
+                f'style="height:{size};width:auto;vertical-align:middle;'
+                f'border-radius:2px;display:inline-block;">')
     fl = wc.FLAGS.get(team, "")
     if not fl:
         return ""
@@ -1108,7 +1155,10 @@ form_html = "".join(
     for r in w_form
 )
 st.html(f"""
-<div class="winner-card">
+<div style="background:linear-gradient(270deg,#4f9eff,#a78bfa,#f59e0b,#22c55e,#4f9eff);
+            background-size:400% 400%;animation:borderSpin 6s ease infinite;
+            padding:2px;border-radius:14px;margin-bottom:24px;">
+  <div class="winner-card">
     <div class="winner-flag">{flag_html(w_team, "3rem")}</div>
     <div style="flex:1">
         <div class="winner-rank">① Projected Champion</div>
@@ -1129,6 +1179,7 @@ st.html(f"""
         <div class="winner-pct">{w_pct:.1f}%</div>
         <div class="winner-sub">to lift the trophy</div>
     </div>
+  </div>
 </div>
 """)
 

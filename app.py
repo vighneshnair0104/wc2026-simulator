@@ -1261,27 +1261,59 @@ with tabs[0]:
     with col_b:
         st.html('<div class="sec-label">Stage Progression · Top 16</div>')
         top16  = srt[:16]
-        stages = ["Qualify", "QF", "SF", "Final", "Win"]
-        keys   = ["p_r16", "p_qf", "p_sf", "p_final", "p_win"]
-        z      = [[p[k] for k in keys] for _, p in top16]
-        y_lbls = [f"[{_FLAG_ISO.get(t,'').upper()}] {t}" for t, _ in top16]
+        stages = [("Qualify","p_r16"), ("QF","p_qf"), ("SF","p_sf"), ("Final","p_final"), ("Win","p_win")]
 
-        fig2 = go.Figure(go.Heatmap(
-            z=z, x=stages, y=y_lbls,
-            colorscale=[[0, "#13131a"], [0.4, "#1e3a5f"], [0.75, "#1d4ed8"], [1, C["accent"]]],
-            showscale=False,
-            text=[[f"{v:.0f}" for v in row] for row in z],
-            texttemplate="%{text}",
-            textfont=dict(size=10, color=C["text"]),
-            zmin=0, zmax=100,
-            hovertemplate="<b>%{y}</b><br>%{x}: %{z:.1f}%<extra></extra>",
-        ))
-        fig2.update_layout(
-            **base_layout(height=560),
-            yaxis=dict(autorange="reversed", tickfont=dict(size=11, color=C["text"])),
-            xaxis=dict(tickfont=dict(size=11, color=C["sub"]), side="top"),
+        _hdr_cells = "".join(
+            f'<th style="text-align:center;font-size:9px;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:.07em;color:{C["sub"]};padding:7px 10px;'
+            f'border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);">{s}</th>'
+            for s, _ in stages
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        _tbl_rows = ""
+        for _i, (_t, _p) in enumerate(top16):
+            _iso  = _FLAG_ISO.get(_t, "")
+            _fimg = (f'<img src="https://flagcdn.com/w40/{_iso}.png" '
+                     f'style="height:13px;width:auto;border-radius:2px;'
+                     f'vertical-align:middle;margin-right:5px;flex-shrink:0;">' if _iso else "")
+            _rbg  = "rgba(255,255,255,0.02)" if _i % 2 == 0 else "transparent"
+            _cells = ""
+            for _, _k in stages:
+                _v = _p.get(_k, 0)
+                if _v <= 2:
+                    _bg = "rgba(255,255,255,0.03)"; _tc = C["muted"]
+                else:
+                    _al = min(_v / 70, 0.92)
+                    _bg = f"rgba(29,78,216,{_al:.2f})"
+                    _tc = "#ffffff" if _v >= 50 else C["text"]
+                _cells += (
+                    f'<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;'
+                    f'font-size:11px;color:{_tc};background:{_bg};padding:6px 8px;'
+                    f'border:1px solid rgba(255,255,255,0.04);">{_v:.0f}</td>'
+                )
+            _tbl_rows += (
+                f'<tr style="background:{_rbg};">'
+                f'<td style="padding:5px 10px;white-space:nowrap;border:1px solid rgba(255,255,255,0.04);">'
+                f'<div style="display:flex;align-items:center;">'
+                f'{_fimg}<span style="font-size:11px;color:{C["text"]}">{_t}</span>'
+                f'</div></td>{_cells}</tr>'
+            )
+        st.html(f"""
+<div style="overflow-x:auto;border:1px solid rgba(255,255,255,0.07);
+            border-radius:8px;overflow:hidden;">
+<table style="width:100%;border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th style="text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;
+                 letter-spacing:.07em;color:{C['sub']};padding:7px 10px;
+                 border-bottom:1px solid rgba(255,255,255,0.08);
+                 background:rgba(255,255,255,0.03);">Team</th>
+      {_hdr_cells}
+    </tr>
+  </thead>
+  <tbody>{_tbl_rows}</tbody>
+</table>
+</div>
+""")
 
     st.html('<div class="sec-label">Full Rankings · All 48 Teams</div>')
     rows = []
@@ -1322,45 +1354,93 @@ with tabs[1]:
     col_a, col_b = st.columns(2, gap="large")
     with col_a:
         st.html('<div class="sec-label">Group Stage · Expected W / D / L</div>')
-        names_ko = [f"[{_FLAG_ISO.get(t,'').upper()}] {t}" for t, _ in top24]
-        keys_t   = [t for t, _ in top24]
-        fig3 = go.Figure()
-        for label, key, color in [("Wins","gs_w",C["green"]),("Draws","gs_d",C["yellow"]),("Losses","gs_l",C["red"])]:
-            fig3.add_trace(go.Bar(
-                name=label,
-                x=names_ko,
-                y=[probs[t][key] for t in keys_t],
-                marker=dict(color=color, line=dict(width=0)),
-            ))
-        fig3.update_layout(
-            **base_layout(height=340), barmode="group",
-            xaxis=ax(tickangle=-40, tickfont=dict(size=10)),
-            yaxis=ax(title="avg matches out of 3"),
-        )
-        st.plotly_chart(fig3, use_container_width=True)
+        _wdl_rows = ""
+        for _t, _p in top24:
+            _iso  = _FLAG_ISO.get(_t, "")
+            _fimg = (f'<img src="https://flagcdn.com/w40/{_iso}.png" '
+                     f'style="height:12px;width:auto;border-radius:2px;'
+                     f'vertical-align:middle;flex-shrink:0;">' if _iso else "")
+            _w, _d, _l = _p.get("gs_w", 0), _p.get("gs_d", 0), _p.get("gs_l", 0)
+            _tot = max(_w + _d + _l, 0.01)
+            _wdl_rows += (
+                f'<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;'
+                f'border-bottom:1px solid rgba(255,255,255,0.04);">'
+                f'{_fimg}'
+                f'<div style="width:96px;font-size:10px;color:{C["text"]};flex-shrink:0;'
+                f'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{_t}</div>'
+                f'<div style="flex:1;display:flex;height:10px;border-radius:3px;overflow:hidden;">'
+                f'<div style="width:{_w/_tot*100:.0f}%;background:{C["green"]};"></div>'
+                f'<div style="width:{_d/_tot*100:.0f}%;background:{C["yellow"]};"></div>'
+                f'<div style="width:{_l/_tot*100:.0f}%;background:{C["red"]};"></div>'
+                f'</div>'
+                f'<span style="font-size:10px;font-family:monospace;color:{C["green"]};'
+                f'width:30px;text-align:right;flex-shrink:0;">{_w:.1f}W</span>'
+                f'<span style="font-size:10px;font-family:monospace;color:{C["yellow"]};'
+                f'width:30px;text-align:right;flex-shrink:0;">{_d:.1f}D</span>'
+                f'<span style="font-size:10px;font-family:monospace;color:{C["red"]};'
+                f'width:26px;text-align:right;flex-shrink:0;">{_l:.1f}L</span>'
+                f'</div>'
+            )
+        st.html(f'<div style="border:1px solid rgba(255,255,255,0.07);border-radius:8px;'
+                f'overflow:hidden;padding:3px 0;">{_wdl_rows}</div>')
 
     with col_b:
         st.html('<div class="sec-label">Knockout Win Rate · When Reached</div>')
-        pal = [C["accent"], C["accent2"], "#f472b6", C["gold"], C["green"]]
-        fig4 = go.Figure()
-        for (stg, lbl), col in zip([("r32","R32"),("r16","R16"),("qf","QF"),("sf","SF"),("final","Final")], pal):
-            xs, ys = [], []
-            for t, _ in top24:
-                if probs[t].get(f"{stg}_reach", 0) >= 1.0:
-                    xs.append(f"[{_FLAG_ISO.get(t,'').upper()}] {t}")
-                    ys.append(probs[t].get(f"{stg}_wpct", 0))
-            if xs:
-                fig4.add_trace(go.Scatter(
-                    x=xs, y=ys, mode="lines+markers", name=lbl,
-                    line=dict(color=col, width=2),
-                    marker=dict(size=6, color=col, line=dict(width=1.5, color=C["bg"])),
-                ))
-        fig4.update_layout(
-            **base_layout(height=340),
-            yaxis=ax(title="Win % when reached", range=[20, 100]),
-            xaxis=ax(tickangle=-40, tickfont=dict(size=10)),
+        _ko_stages = [("r32","R32"), ("r16","R16"), ("qf","QF"), ("sf","SF"), ("final","Final")]
+        _ko_hdr = "".join(
+            f'<th style="text-align:center;font-size:9px;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:.07em;color:{C["sub"]};padding:6px 8px;'
+            f'border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);">{_lbl}</th>'
+            for _, _lbl in _ko_stages
         )
-        st.plotly_chart(fig4, use_container_width=True)
+        _ko_rows = ""
+        for _i, (_t, _p) in enumerate(top24):
+            _iso  = _FLAG_ISO.get(_t, "")
+            _fimg = (f'<img src="https://flagcdn.com/w40/{_iso}.png" '
+                     f'style="height:12px;width:auto;border-radius:2px;'
+                     f'vertical-align:middle;margin-right:4px;flex-shrink:0;">' if _iso else "")
+            _rbg  = "rgba(255,255,255,0.02)" if _i % 2 == 0 else "transparent"
+            _cells = ""
+            for _stg, _ in _ko_stages:
+                if _p.get(f"{_stg}_reach", 0) < 0.5:
+                    _cells += (
+                        f'<td style="text-align:center;color:{C["muted"]};font-size:10px;'
+                        f'padding:5px 6px;border:1px solid rgba(255,255,255,0.04);">—</td>'
+                    )
+                else:
+                    _wpct = _p.get(f"{_stg}_wpct", 0)
+                    _al   = min(_wpct / 100, 0.9)
+                    _bg   = f"rgba(29,78,216,{_al:.2f})"
+                    _tc   = "#ffffff" if _al > 0.5 else C["text"]
+                    _cells += (
+                        f'<td style="text-align:center;font-family:monospace;font-size:10px;'
+                        f'color:{_tc};background:{_bg};padding:5px 6px;'
+                        f'border:1px solid rgba(255,255,255,0.04);">{_wpct:.0f}%</td>'
+                    )
+            _ko_rows += (
+                f'<tr style="background:{_rbg};">'
+                f'<td style="padding:4px 8px;white-space:nowrap;border:1px solid rgba(255,255,255,0.04);">'
+                f'<div style="display:flex;align-items:center;">'
+                f'{_fimg}<span style="font-size:10px;color:{C["text"]}">{_t}</span>'
+                f'</div></td>{_cells}</tr>'
+            )
+        st.html(f"""
+<div style="overflow-x:auto;border:1px solid rgba(255,255,255,0.07);
+            border-radius:8px;overflow:hidden;">
+<table style="width:100%;border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th style="text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;
+                 letter-spacing:.07em;color:{C['sub']};padding:6px 8px;
+                 border-bottom:1px solid rgba(255,255,255,0.08);
+                 background:rgba(255,255,255,0.03);">Team</th>
+      {_ko_hdr}
+    </tr>
+  </thead>
+  <tbody>{_ko_rows}</tbody>
+</table>
+</div>
+""")
 
     st.html('<div class="sec-label">Full Stage Records · Top 32</div>')
     rec = []
@@ -1387,28 +1467,42 @@ with tabs[2]:
         cols4 = st.columns(4, gap="small")
         for ci, (grp, teams) in enumerate(grp_items[row_start:row_start+4]):
             with cols4[ci]:
-                pcts   = [probs.get(t, {}).get("p_r16", 0) for t in teams]
-                colors = [C["green"] if v >= 50 else (C["yellow"] if v >= 28 else C["red"]) for v in pcts]
-                ylbls  = [f"[{_FLAG_ISO.get(t,'').upper()}] {t}" for t in teams]
-                avg_elo = sum(wc.ELO.get(t, 0) for t in teams) // 4
-                fig_g = go.Figure(go.Bar(
-                    x=pcts, y=ylbls, orientation="h",
-                    marker=dict(color=colors, line=dict(width=0)),
-                    text=[f"{v:.0f}%" for v in pcts],
-                    textposition="outside",
-                    textfont=dict(size=10, color=C["sub"]),
-                ))
-                fig_g.add_vline(x=50, line_dash="dot",
-                                line_color="rgba(255,255,255,0.15)", line_width=1)
-                fig_g.update_layout(
-                    **base_layout(height=195, margin=dict(l=6, r=46, t=28, b=6)),
-                    title=dict(text=f"Group {grp} · Elo avg {avg_elo}",
-                               font=dict(size=11, color=C["sub"]), x=0),
-                    xaxis=dict(range=[0,110], showgrid=False, showticklabels=False, zeroline=False),
-                    yaxis=dict(tickfont=dict(size=11, color=C["text"]), autorange="reversed"),
-                    showlegend=False,
-                )
-                st.plotly_chart(fig_g, use_container_width=True)
+                _avg_elo   = sum(wc.ELO.get(t, 0) for t in teams) // 4
+                _sorted_ts = sorted(teams, key=lambda x: -probs.get(x, {}).get("p_r16", 0))
+                _max_pct_g = max((probs.get(t, {}).get("p_r16", 0) for t in teams), default=1)
+                _t_bars    = ""
+                for _t in _sorted_ts:
+                    _pct  = probs.get(_t, {}).get("p_r16", 0)
+                    _bw   = min(_pct / max(_max_pct_g, 1) * 100, 100)
+                    _bc   = C["green"] if _pct >= 50 else (C["yellow"] if _pct >= 28 else C["red"])
+                    _iso  = _FLAG_ISO.get(_t, "")
+                    _fimg = (f'<img src="https://flagcdn.com/w40/{_iso}.png" '
+                             f'style="height:12px;width:auto;border-radius:1px;flex-shrink:0;">'
+                             if _iso else "")
+                    _t_bars += (
+                        f'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
+                        f'{_fimg}'
+                        f'<span style="font-size:10px;color:{C["text"]};width:82px;overflow:hidden;'
+                        f'text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">{_t}</span>'
+                        f'<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:2px;'
+                        f'height:12px;overflow:hidden;">'
+                        f'<div style="width:{_bw:.0f}%;background:{_bc};height:100%;border-radius:2px;">'
+                        f'</div></div>'
+                        f'<span style="font-size:9px;color:{C["sub"]};font-family:monospace;'
+                        f'width:26px;text-align:right;flex-shrink:0;">{_pct:.0f}%</span>'
+                        f'</div>'
+                    )
+                st.html(f"""
+<div style="background:rgba(28,28,33,0.65);backdrop-filter:blur(12px) saturate(1.2);
+            border:1px solid rgba(255,255,255,0.09);border-radius:10px;
+            padding:11px 12px;margin-bottom:6px;">
+  <div style="font-size:9px;font-weight:700;color:{C['accent']};
+              letter-spacing:.08em;margin-bottom:9px;text-transform:uppercase;">
+    Group {grp} · Elo avg {_avg_elo}
+  </div>
+  {_t_bars}
+</div>
+""")
 
     st.html('<div class="sec-label">Group Standings Summary</div>')
     gst = []
@@ -1509,37 +1603,231 @@ with tabs[3]:
               </div>
             </div>""")
 
-    st.html('<div class="sec-label" style="margin-top:8px">Projected Knockout Bracket · Top 8 Contenders</div>')
-    _top8 = srt[:8]
-    _bracket_html = ""
-    for _bi in range(0, 8, 2):
-        _t1, _p1 = _top8[_bi]
-        _t2, _p2 = _top8[_bi + 1] if _bi + 1 < len(_top8) else ("TBD", {})
-        _f1, _f2 = wc.FLAGS.get(_t1,""), wc.FLAGS.get(_t2,"")
-        _pct1, _pct2 = _p1.get("p_win",0), _p2.get("p_win",0) if isinstance(_p2,dict) else 0
-        _bracket_html += f"""
-        <div style="background:{C['card']};border:1px solid {C['border']};border-radius:10px;
-                    padding:12px 16px;display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:13px">{_f1} <b style="color:{C['text']}">{_t1}</b></span>
-            <span style="font-family:monospace;font-size:12px;color:{C['accent']};
-                         background:rgba(79,158,255,.1);padding:2px 8px;border-radius:4px">{_pct1:.1f}%</span>
-          </div>
-          <div style="height:1px;background:{C['border']}"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:13px">{_f2} <b style="color:{C['text']}">{_t2}</b></span>
-            <span style="font-family:monospace;font-size:12px;color:{C['accent']};
-                         background:rgba(79,158,255,.1);padding:2px 8px;border-radius:4px">{_pct2:.1f}%</span>
-          </div>
-        </div>"""
-    st.html(f"""
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-                gap:12px;margin-top:4px">
-      {_bracket_html}
-    </div>
-    <div style="margin-top:10px;font-size:10px;color:{C['muted']}">
-      Bracket based on simulation championship probabilities · Updates live as results come in
-    </div>""")
+    st.html('<div class="sec-label" style="margin-top:20px">Projected Knockout Bracket · All 5 Rounds</div>')
+
+    # ── Build projected qualifiers ────────────────────────────────────────────
+    def _sort_grp(teams):
+        return sorted(
+            _build_standings(teams, _actual),
+            key=lambda x: (-x[1]["Pts"], -(x[1]["GF"]-x[1]["GA"]), -x[1]["GF"],
+                           -probs.get(x[0], {}).get("p_r16", 0))
+        )
+
+    _gp = {g: [t for t, _ in _sort_grp(ts)] for g, ts in wc.GROUPS.items()}
+
+    _thirds_list = []
+    for _g, _ts in wc.GROUPS.items():
+        _t3 = _gp[_g][2]
+        _s3 = dict(_build_standings(_ts, _actual)).get(_t3, {"Pts":0,"GF":0,"GA":0})
+        _thirds_list.append((_t3, _s3["Pts"], _s3["GF"]-_s3["GA"], _s3["GF"],
+                             probs.get(_t3, {}).get("p_r16", 0)))
+    _thirds_list.sort(key=lambda x: (-x[1], -x[2], -x[3], -x[4]))
+    _bt8 = [x[0] for x in _thirds_list[:8]]
+
+    _r32_mu = [
+        (_gp["A"][0],_gp["B"][1]), (_gp["C"][0],_gp["D"][1]),
+        (_gp["E"][0],_gp["F"][1]), (_gp["G"][0],_gp["H"][1]),
+        (_gp["I"][0],_gp["J"][1]), (_gp["K"][0],_gp["L"][1]),
+        (_gp["A"][1],_gp["B"][0]), (_gp["C"][1],_gp["D"][0]),
+        (_gp["E"][1],_gp["F"][0]), (_gp["G"][1],_gp["H"][0]),
+        (_gp["I"][1],_gp["J"][0]), (_gp["K"][1],_gp["L"][0]),
+        (_bt8[0],_bt8[1]), (_bt8[2],_bt8[3]),
+        (_bt8[4],_bt8[5]), (_bt8[6],_bt8[7]),
+    ]
+
+    def _elo_wp(t1, t2):
+        e1, e2 = wc.ELO.get(t1, 1600), wc.ELO.get(t2, 1600)
+        return round(100 / (1 + 10**((e2-e1)/400)), 1)
+
+    def _resolve(t1, t2):
+        """Returns (winner, p1%, p2%, confirmed, score_str)."""
+        for h, a in [(t1,t2), (t2,t1)]:
+            if (h,a) in _actual:
+                gh, ga = _actual[(h,a)]
+                if gh == ga:
+                    break  # draw in KO = ET/pens, fall through to prediction
+                won = h if gh > ga else a
+                sc  = f"{gh}–{ga}" if h==t1 else f"{ga}–{gh}"
+                return won, _elo_wp(t1,t2), 100-_elo_wp(t1,t2), True, sc
+        p1 = _elo_wp(t1, t2)
+        return (t1 if p1>=50 else t2), p1, 100-p1, False, None
+
+    def _sim_rnd(pairs):
+        res, wlist = [], []
+        for t1, t2 in pairs:
+            w, p1, p2, cf, sc = _resolve(t1, t2)
+            res.append({"t1":t1,"t2":t2,"w":w,"p1":p1,"p2":p2,"cf":cf,"sc":sc})
+            wlist.append(w)
+        return res, wlist
+
+    _r32r, _r16t = _sim_rnd(_r32_mu)
+    _r16r, _qft  = _sim_rnd(list(zip(_r16t[::2], _r16t[1::2])))
+    _qfr,  _sft  = _sim_rnd(list(zip(_qft[::2],  _qft[1::2])))
+    _sfr,  _fint = _sim_rnd(list(zip(_sft[::2],  _sft[1::2])))
+    _finr, _chpl = _sim_rnd([(_fint[0], _fint[1])])
+    _champ = _chpl[0]
+
+    # ── Match card builder ────────────────────────────────────────────────────
+    def _mcard(m, label=""):
+        t1,t2,w = m["t1"],m["t2"],m["w"]
+        p1,p2,cf,sc = m["p1"],m["p2"],m["cf"],m["sc"]
+        i1,i2 = _FLAG_ISO.get(t1,""), _FLAG_ISO.get(t2,"")
+        fi = lambda i: (f'<img src="https://flagcdn.com/w40/{i}.png" '
+                        f'style="height:13px;width:auto;border-radius:1px;flex-shrink:0;">' if i else "")
+        f1, f2 = fi(i1), fi(i2)
+        bg1 = "background:rgba(79,158,255,0.11);" if w==t1 else ""
+        bg2 = "background:rgba(79,158,255,0.11);" if w==t2 else ""
+        fc1 = C["text"] if w==t1 else C["sub"]
+        fc2 = C["text"] if w==t2 else C["sub"]
+        if cf:
+            pc1 = (f'<span style="font-size:10px;font-weight:700;color:{C["green"]};">'
+                   f'{"✓" if w==t1 else ""}</span>')
+            pc2 = (f'<span style="font-size:10px;font-weight:700;color:{C["green"]};">'
+                   f'{"✓" if w==t2 else ""}</span>')
+            foot = (f'<div style="padding:4px 10px;background:rgba(34,197,94,.05);'
+                    f'border-top:1px solid rgba(34,197,94,.15);">'
+                    f'<span style="font-size:9px;font-weight:700;color:{C["green"]};">'
+                    f'✓ CONFIRMED · {w} · {sc}</span></div>')
+        else:
+            pc1 = (f'<span style="font-family:monospace;font-size:10px;'
+                   f'color:{"#4f9eff" if w==t1 else C["muted"]};">{p1:.0f}%</span>')
+            pc2 = (f'<span style="font-family:monospace;font-size:10px;'
+                   f'color:{"#4f9eff" if w==t2 else C["muted"]};">{p2:.0f}%</span>')
+            foot = (f'<div style="padding:4px 10px;background:rgba(79,158,255,.04);'
+                    f'border-top:1px solid rgba(79,158,255,.1);">'
+                    f'<span style="font-size:9px;font-weight:700;color:{C["accent"]};">'
+                    f'→ {w} advances (ELO model)</span></div>')
+        lh = (f'<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;'
+              f'color:{C["sub"]};padding:3px 10px;background:rgba(255,255,255,.02);'
+              f'border-bottom:1px solid rgba(255,255,255,.05);">{label}</div>') if label else ""
+        return (f'<div style="border:1px solid rgba(255,255,255,.09);border-radius:9px;overflow:hidden;'
+                f'background:rgba(22,22,26,.88);margin-bottom:6px;">'
+                f'{lh}'
+                f'<div style="display:flex;align-items:center;gap:7px;padding:7px 11px;{bg1}">'
+                f'{f1}<span style="font-size:11px;color:{fc1};flex:1;overflow:hidden;'
+                f'text-overflow:ellipsis;white-space:nowrap;">{t1}</span>{pc1}</div>'
+                f'<div style="height:1px;background:rgba(255,255,255,.06);"></div>'
+                f'<div style="display:flex;align-items:center;gap:7px;padding:7px 11px;{bg2}">'
+                f'{f2}<span style="font-size:11px;color:{fc2};flex:1;overflow:hidden;'
+                f'text-overflow:ellipsis;white-space:nowrap;">{t2}</span>{pc2}</div>'
+                f'{foot}</div>')
+
+    # ── Sub-tabs: one per round ───────────────────────────────────────────────
+    _rnd_tabs = st.tabs(["🏆 Summary", "Round of 32", "Round of 16", "Quarterfinals", "Semifinals", "Final"])
+
+    # ── SUMMARY ──────────────────────────────────────────────────────────────
+    with _rnd_tabs[0]:
+        _ciso = _FLAG_ISO.get(_champ, "")
+        _cfimg = (f'<img src="https://flagcdn.com/w80/{_ciso}.png" '
+                  f'style="height:4.5rem;width:auto;border-radius:4px;'
+                  f'filter:drop-shadow(0 0 24px rgba(245,158,11,.55));margin-bottom:8px;">'
+                  if _ciso else "")
+        _cpct = probs.get(_champ, {}).get("p_win", 0)
+        st.html(f"""
+<div style="text-align:center;padding:28px 20px;
+            background:linear-gradient(135deg,rgba(79,158,255,.07),rgba(167,139,250,.07));
+            border:1px solid rgba(79,158,255,.18);border-radius:14px;margin-bottom:20px;">
+  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+              color:{C['sub']};margin-bottom:14px;">Projected World Champion</div>
+  {_cfimg}
+  <div style="font-size:2rem;font-weight:800;color:{C['text']};margin-bottom:4px;">{_champ}</div>
+  <div style="font-size:1.4rem;font-weight:700;color:{C['accent']};
+              font-family:'JetBrains Mono',monospace;">{_cpct:.1f}%</div>
+  <div style="font-size:10px;color:{C['muted']};margin-top:3px;">tournament win probability</div>
+</div>""")
+
+        st.html('<div class="sec-label">Projected Final</div>')
+        _fsc1, _fsc2, _fsc3 = st.columns([1, 2, 1])
+        with _fsc2:
+            st.html(_mcard(_finr[0], label="Final · July 19, 2026"))
+
+        st.html('<div class="sec-label">Projected Semifinals</div>')
+        _sfc = st.columns(2, gap="medium")
+        for _i, _sfm in enumerate(_sfr):
+            with _sfc[_i]:
+                st.html(_mcard(_sfm, label=f"Semifinal {_i+1}"))
+
+        st.html('<div class="sec-label">Projected Quarterfinals</div>')
+        _qfc = st.columns(4, gap="small")
+        for _i, _qfm in enumerate(_qfr):
+            with _qfc[_i]:
+                st.html(_mcard(_qfm, label=f"QF {_i+1}"))
+
+        _n_confirmed = sum(1 for m in _r32r + _r16r + _qfr + _sfr + _finr if m["cf"])
+        st.html(f'<div style="font-size:10px;color:{C["muted"]};margin-top:14px;'
+                f'text-align:center;">'
+                f'{"✓ " + str(_n_confirmed) + " match(es) confirmed from actual results · " if _n_confirmed else ""}'
+                f'All other matches predicted by ELO model · Updates when new results are added</div>')
+
+    # ── ROUND OF 32 ──────────────────────────────────────────────────────────
+    with _rnd_tabs[1]:
+        st.html(f'<div style="font-size:10px;color:{C["sub"]};margin-bottom:14px;">'
+                f'32 teams · 16 matches · Winners advance to Round of 16</div>')
+        _lbl32 = [
+            "A1 vs B2","C1 vs D2","E1 vs F2","G1 vs H2",
+            "I1 vs J2","K1 vs L2","A2 vs B1","C2 vs D1",
+            "E2 vs F1","G2 vs H1","I2 vs J1","K2 vs L1",
+            "Best 3rd · 1 vs 2","Best 3rd · 3 vs 4",
+            "Best 3rd · 5 vs 6","Best 3rd · 7 vs 8",
+        ]
+        _c32 = st.columns(4, gap="small")
+        for _i, _m32 in enumerate(_r32r):
+            with _c32[_i // 4]:
+                st.html(_mcard(_m32, label=_lbl32[_i]))
+
+    # ── ROUND OF 16 ──────────────────────────────────────────────────────────
+    with _rnd_tabs[2]:
+        st.html(f'<div style="font-size:10px;color:{C["sub"]};margin-bottom:14px;">'
+                f'16 teams · 8 matches · Winners advance to Quarterfinals</div>')
+        _c16 = st.columns(4, gap="small")
+        for _i, _m16 in enumerate(_r16r):
+            with _c16[_i // 2]:
+                st.html(_mcard(_m16, label=f"R16 · Match {_i+1}"))
+
+    # ── QUARTERFINALS ─────────────────────────────────────────────────────────
+    with _rnd_tabs[3]:
+        st.html(f'<div style="font-size:10px;color:{C["sub"]};margin-bottom:14px;">'
+                f'8 teams · 4 matches · Winners advance to Semifinals</div>')
+        _cqf = st.columns(4, gap="small")
+        for _i, _mqf in enumerate(_qfr):
+            with _cqf[_i]:
+                st.html(_mcard(_mqf, label=f"Quarterfinal {_i+1}"))
+
+    # ── SEMIFINALS ───────────────────────────────────────────────────────────
+    with _rnd_tabs[4]:
+        st.html(f'<div style="font-size:10px;color:{C["sub"]};margin-bottom:14px;">'
+                f'4 teams · 2 matches · Winners meet in the Final</div>')
+        _csf = st.columns(2, gap="large")
+        for _i, _msf in enumerate(_sfr):
+            with _csf[_i]:
+                st.html(_mcard(_msf, label=f"Semifinal {_i+1}"))
+
+    # ── FINAL ────────────────────────────────────────────────────────────────
+    with _rnd_tabs[5]:
+        st.html(f'<div style="font-size:10px;color:{C["sub"]};margin-bottom:14px;">'
+                f'The World Cup Final · MetLife Stadium · July 19, 2026</div>')
+        _cfin1, _cfin2, _cfin3 = st.columns([1, 2, 1])
+        with _cfin2:
+            st.html(_mcard(_finr[0], label="World Cup Final"))
+
+        _ciso2 = _FLAG_ISO.get(_champ, "")
+        _cfimg2 = (f'<img src="https://flagcdn.com/w80/{_ciso2}.png" '
+                   f'style="height:5rem;width:auto;border-radius:4px;">' if _ciso2 else "")
+        st.html(f"""
+<div style="text-align:center;margin-top:20px;padding:2px;
+            background:linear-gradient(270deg,#4f9eff,#a78bfa,#f59e0b,#22c55e,#4f9eff);
+            background-size:400% 400%;animation:borderSpin 6s ease infinite;
+            border-radius:14px;">
+  <div style="background:{C['card']};border-radius:12px;padding:28px 20px;">
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;
+                color:{C['sub']};margin-bottom:14px;">🏆 Projected World Champion</div>
+    {_cfimg2}
+    <div style="font-size:2.2rem;font-weight:800;color:{C['text']};margin:10px 0 4px;">{_champ}</div>
+    <div style="font-size:1.5rem;font-weight:700;color:{C['accent']};
+                font-family:'JetBrains Mono',monospace;">{probs.get(_champ,{}).get("p_win",0):.1f}%</div>
+    <div style="font-size:10px;color:{C['muted']};margin-top:4px;">championship probability</div>
+  </div>
+</div>""")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

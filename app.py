@@ -51,6 +51,63 @@ C = {
     "gold":    "#f59e0b",
 }
 
+# ── Video / animated background ───────────────────────────────────────────────
+# YouTube video ID — royalty-free football loop. Change this to any YouTube ID.
+_VIDEO_ID = "B1HnQqF9mTA"
+
+st.html(f"""
+<style>
+/* ── Stadium atmosphere — CSS always-on fallback ── */
+[data-testid="stAppViewContainer"]::before {{
+    content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+    background:
+        radial-gradient(ellipse 90% 55% at 50% -5%,  rgba(22,163,74,.11) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 35% at 15% 55%,  rgba(79,158,255,.07) 0%,transparent 55%),
+        radial-gradient(ellipse 50% 35% at 85% 55%,  rgba(167,139,250,.07) 0%,transparent 55%),
+        radial-gradient(ellipse 80% 40% at 50% 110%, rgba(22,163,74,.07) 0%,transparent 55%);
+    animation:stadium-breathe 10s ease-in-out infinite;
+}}
+@keyframes stadium-breathe{{0%,100%{{opacity:.5}}50%{{opacity:1}}}}
+
+/* ── Subtle grass grid overlay ── */
+[data-testid="stAppViewContainer"]::after {{
+    content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+    background-image:
+        linear-gradient(rgba(34,197,94,.022) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(34,197,94,.022) 1px,transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 10%,transparent 80%);
+    mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 10%,transparent 80%);
+}}
+
+/* ── YouTube video background (injected below by JS) ── */
+#wc-yt-bg{{position:fixed!important;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none;}}
+#wc-yt-bg iframe{{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(1.25);width:100vw;height:56.25vw;min-height:100vh;min-width:177.78vh;border:none;pointer-events:none;}}
+#wc-yt-overlay{{position:absolute;inset:0;background:rgba(14,14,16,.82);}}
+</style>
+<script>
+(function(){{
+    var vid="{_VIDEO_ID}";
+    function inject(doc){{
+        if(doc.getElementById('wc-yt-bg'))return;
+        var wrap=doc.createElement('div');wrap.id='wc-yt-bg';
+        var fr=doc.createElement('iframe');
+        fr.src='https://www.youtube-nocookie.com/embed/'+vid+'?autoplay=1&mute=1&loop=1&playlist='+vid+'&controls=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&vq=hd720';
+        fr.allow='autoplay;encrypted-media';
+        var ov=doc.createElement('div');ov.id='wc-yt-overlay';
+        wrap.appendChild(fr);wrap.appendChild(ov);
+        doc.body.insertBefore(wrap,doc.body.firstChild);
+    }}
+    try{{inject(document);}}catch(e){{}}
+    try{{if(window.parent&&window.parent!==window)inject(window.parent.document);}}catch(e){{}}
+    setTimeout(function(){{
+        try{{inject(document);}}catch(e){{}}
+        try{{if(window.parent&&window.parent!==window)inject(window.parent.document);}}catch(e){{}}
+    }},2000);
+}})();
+</script>
+""")
+
 st.html(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');

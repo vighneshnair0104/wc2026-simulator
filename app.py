@@ -1229,28 +1229,34 @@ with tabs[0]:
     col_a, col_b = st.columns([3, 2], gap="large")
 
     with col_a:
-        st.html('<div class="sec-label">Win Probability · All 48 Teams</div>')
+        st.html('<div class="sec-label">Win Probability · Top 20 Teams</div>')
         top20 = srt[:20]
-        vals  = [p["p_win"] for _, p in reversed(top20)]
-        names = [f"{wc.FLAGS.get(t,'')} {t}" for t, _ in reversed(top20)]
-        bar_c = [C["accent"] if v >= max_pct * 0.7 else (C["accent2"] if v >= max_pct * 0.4 else C["muted"])
-                 for v in vals]
-
-        fig = go.Figure(go.Bar(
-            x=vals, y=names, orientation="h",
-            marker=dict(color=bar_c, line=dict(width=0)),
-            text=[f"{v:.1f}%" for v in vals],
-            textposition="outside",
-            textfont=dict(size=10.5, color=C["sub"]),
-            hovertemplate="<b>%{y}</b><br>%{x:.2f}%<extra></extra>",
-        ))
-        fig.update_layout(
-            **base_layout(height=560),
-            xaxis=ax(title="", showticklabels=False, range=[0, max(vals)*1.2]),
-            yaxis=ax(tickfont=dict(size=11.5, color=C["text"])),
-            bargap=0.35,
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        _bar_rows = ""
+        for _bi, (t, p) in enumerate(top20, 1):
+            _pct  = p["p_win"]
+            _bw   = min(_pct / max_pct * 100, 100)
+            _iso  = _FLAG_ISO.get(t, "")
+            _fimg = (f'<img src="https://flagcdn.com/w40/{_iso}.png" '
+                     f'style="height:15px;width:auto;border-radius:2px;flex-shrink:0;">'
+                     if _iso else f'<span style="font-size:13px">{wc.FLAGS.get(t,"")}</span>')
+            _bc   = C["accent"] if _pct >= max_pct*.7 else (C["accent2"] if _pct >= max_pct*.4 else C["muted"])
+            _rc   = C["accent"] if _bi == 1 else (C["gold"] if _bi <= 3 else C["sub"])
+            _bar_rows += (
+                f'<div style="display:flex;align-items:center;gap:10px;padding:5px 0;'
+                f'border-bottom:1px solid rgba(255,255,255,0.04);">'
+                f'<div style="width:24px;text-align:right;font-size:10px;font-weight:700;'
+                f'color:{_rc};font-family:monospace;flex-shrink:0;">#{_bi}</div>'
+                f'{_fimg}'
+                f'<div style="width:128px;font-size:12px;color:{C["text"]};white-space:nowrap;'
+                f'overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">{t}</div>'
+                f'<div style="flex:1;background:rgba(255,255,255,0.06);border-radius:3px;height:14px;overflow:hidden;">'
+                f'<div style="width:{_bw:.1f}%;background:{_bc};height:100%;border-radius:3px;"></div>'
+                f'</div>'
+                f'<div style="font-size:11px;color:{C["sub"]};font-family:\'JetBrains Mono\',monospace;'
+                f'width:44px;text-align:right;flex-shrink:0;">{_pct:.1f}%</div>'
+                f'</div>'
+            )
+        st.html(f'<div style="padding:4px 0;">{_bar_rows}</div>')
 
     with col_b:
         st.html('<div class="sec-label">Stage Progression · Top 16</div>')
@@ -1258,7 +1264,7 @@ with tabs[0]:
         stages = ["Qualify", "QF", "SF", "Final", "Win"]
         keys   = ["p_r16", "p_qf", "p_sf", "p_final", "p_win"]
         z      = [[p[k] for k in keys] for _, p in top16]
-        y_lbls = [f"{wc.FLAGS.get(t,'')} {t}" for t, _ in top16]
+        y_lbls = [f"[{_FLAG_ISO.get(t,'').upper()}] {t}" for t, _ in top16]
 
         fig2 = go.Figure(go.Heatmap(
             z=z, x=stages, y=y_lbls,
@@ -1283,7 +1289,7 @@ with tabs[0]:
         grp = next((g for g, ts in wc.GROUPS.items() if t in ts), "?")
         rows.append({
             "#": rank,
-            "Team": f"{wc.FLAGS.get(t,'')}  {t}",
+            "Team": f"[{_FLAG_ISO.get(t,'').upper()}] {t}",
             "Grp": grp,
             "Elo": wc.ELO.get(t, 0),
             "Form": round(wc.form_score(t), 2),
@@ -1316,7 +1322,7 @@ with tabs[1]:
     col_a, col_b = st.columns(2, gap="large")
     with col_a:
         st.html('<div class="sec-label">Group Stage · Expected W / D / L</div>')
-        names_ko = [f"{wc.FLAGS.get(t,'')} {t}" for t, _ in top24]
+        names_ko = [f"[{_FLAG_ISO.get(t,'').upper()}] {t}" for t, _ in top24]
         keys_t   = [t for t, _ in top24]
         fig3 = go.Figure()
         for label, key, color in [("Wins","gs_w",C["green"]),("Draws","gs_d",C["yellow"]),("Losses","gs_l",C["red"])]:
@@ -1341,7 +1347,7 @@ with tabs[1]:
             xs, ys = [], []
             for t, _ in top24:
                 if probs[t].get(f"{stg}_reach", 0) >= 1.0:
-                    xs.append(f"{wc.FLAGS.get(t,'')} {t}")
+                    xs.append(f"[{_FLAG_ISO.get(t,'').upper()}] {t}")
                     ys.append(probs[t].get(f"{stg}_wpct", 0))
             if xs:
                 fig4.add_trace(go.Scatter(
@@ -1363,7 +1369,7 @@ with tabs[1]:
             if p.get(f"{s}_reach", 0) < 0.5: return "—"
             return f"{p[f'{s}_wpct']:.0f} / {p[f'{s}_lpct']:.0f}"
         rec.append({
-            "Team": f"{wc.FLAGS.get(t,'')}  {t}",
+            "Team": f"[{_FLAG_ISO.get(t,'').upper()}] {t}",
             "Group W–D–L": f"{p['gs_w']:.1f} – {p['gs_d']:.1f} – {p['gs_l']:.1f}",
             "R32 W/L": ko("r32"), "R16 W/L": ko("r16"),
             "QF W/L": ko("qf"),   "SF W/L": ko("sf"),  "Final W/L": ko("final"),
@@ -1383,7 +1389,7 @@ with tabs[2]:
             with cols4[ci]:
                 pcts   = [probs.get(t, {}).get("p_r16", 0) for t in teams]
                 colors = [C["green"] if v >= 50 else (C["yellow"] if v >= 28 else C["red"]) for v in pcts]
-                ylbls  = [f"{wc.FLAGS.get(t,'')} {t}" for t in teams]
+                ylbls  = [f"[{_FLAG_ISO.get(t,'').upper()}] {t}" for t in teams]
                 avg_elo = sum(wc.ELO.get(t, 0) for t in teams) // 4
                 fig_g = go.Figure(go.Bar(
                     x=pcts, y=ylbls, orientation="h",
@@ -1411,7 +1417,7 @@ with tabs[2]:
             p = probs.get(t, {})
             gst.append({
                 "Grp": grp,
-                "Team": f"{wc.FLAGS.get(t,'')}  {t}",
+                "Team": f"[{_FLAG_ISO.get(t,'').upper()}] {t}",
                 "Elo": wc.ELO.get(t, 0),
                 "xG": round(wc.ATTACK_STATS.get(t,(0,)*6)[0], 2),
                 "xGA": round(wc.DEFENSE_STATS.get(t,(0,)*6)[0], 2),
@@ -2557,7 +2563,7 @@ with tabs[7]:
                 continue
             _, rtm, *_ = rpr
             rg, *_ = _pc(rtm)
-            chart_rows.append({"Player": f"{wc.FLAGS.get(rtm,'')} {rn}", "Prob": rp, "Color": rg})
+            chart_rows.append({"Player": f"[{_FLAG_ISO.get(rtm,'').upper()}] {rn}", "Prob": rp, "Color": rg})
 
         if chart_rows:
             fig = go.Figure(go.Bar(

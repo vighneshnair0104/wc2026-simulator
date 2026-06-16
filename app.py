@@ -87,8 +87,6 @@ st.html(f"""
     animation: wc-breathe 9s ease-in-out infinite;
 }}
 </style>
-<div class="wc-stadium-glow"></div>
-<div class="wc-field-grid"></div>
 """)
 
 st.html(f"""
@@ -97,11 +95,35 @@ st.html(f"""
 
 *, *::before, *::after {{ box-sizing: border-box; }}
 
-html, body, [data-testid="stAppViewContainer"],
+html {{
+    background:
+        radial-gradient(ellipse 90% 50% at 50% -5%,  rgba(22,163,74,.22)   0%, transparent 58%),
+        radial-gradient(ellipse 45% 35% at 6%  50%,  rgba(79,158,255,.14)  0%, transparent 52%),
+        radial-gradient(ellipse 45% 35% at 94% 50%,  rgba(167,139,250,.14) 0%, transparent 52%),
+        radial-gradient(ellipse 70% 35% at 50% 108%, rgba(22,163,74,.12)   0%, transparent 52%),
+        {C['bg']} !important;
+    min-height: 100vh;
+    animation: wc-breathe 10s ease-in-out infinite;
+}}
+@keyframes wc-breathe {{ 0%,100% {{ opacity:.70 }} 50% {{ opacity:1 }} }}
+
+body, [data-testid="stAppViewContainer"],
 [data-testid="stMain"], [data-testid="stHeader"] {{
-    background: {C['bg']} !important;
+    background: transparent !important;
     color: {C['text']};
     font-family: 'Inter', -apple-system, system-ui, sans-serif;
+}}
+
+html::before {{
+    content:'';
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+        linear-gradient(rgba(34,197,94,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,197,94,.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 0%, transparent 80%);
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 0%, transparent 80%);
+    animation: wc-breathe 10s ease-in-out infinite;
 }}
 
 /* ── Sidebar ── */

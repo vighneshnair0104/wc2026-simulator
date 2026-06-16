@@ -3,6 +3,13 @@ import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 
+# Load .env for local development (no-op if file absent or dotenv not installed)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd

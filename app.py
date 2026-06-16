@@ -668,6 +668,21 @@ hr {{ border-color: {C['border']} !important; margin: 1.2rem 0 !important; }}
 """)
 
 
+_FLAG_ISO = {
+    "France":"fr",      "Spain":"es",       "Portugal":"pt",     "England":"gb-eng",
+    "Germany":"de",     "Brazil":"br",      "Argentina":"ar",    "Netherlands":"nl",
+    "Belgium":"be",     "Croatia":"hr",     "Morocco":"ma",      "Uruguay":"uy",
+    "Switzerland":"ch", "Japan":"jp",       "USA":"us",          "Colombia":"co",
+    "South Korea":"kr", "Mexico":"mx",      "Canada":"ca",       "Ecuador":"ec",
+    "Senegal":"sn",     "Norway":"no",      "Austria":"at",      "Turkey":"tr",
+    "Australia":"au",   "Saudi Arabia":"sa","Iran":"ir",         "Egypt":"eg",
+    "Ghana":"gh",       "Tunisia":"tn",     "Paraguay":"py",     "Sweden":"se",
+    "Scotland":"gb-sct","Ivory Coast":"ci", "Czechia":"cz",      "Bosnia":"ba",
+    "Qatar":"qa",       "Haiti":"ht",       "Algeria":"dz",      "Jordan":"jo",
+    "Iraq":"iq",        "Curacao":"cw",     "New Zealand":"nz",  "South Africa":"za",
+    "Congo DR":"cd",    "Uzbekistan":"uz",  "Cabo Verde":"cv",   "Panama":"pa",
+}
+
 def _dh(html: str) -> str:
     """Strip common leading whitespace so the opening HTML tag starts at column 0.
     Streamlit 1.44+ requires block-level HTML (<div> etc.) at column 0-3 max."""
@@ -705,12 +720,12 @@ with st.sidebar:
     selected_team = st.selectbox(
         "Team profile",
         sorted(wc.ELO.keys()),
-        format_func=lambda t: f"{wc.FLAGS.get(t,'')}  {t}",
+        format_func=lambda t: f"[{_FLAG_ISO.get(t, '??').upper()}]  {t}",
     )
     selected_group = st.selectbox(
         "Group predictions",
         list(wc.GROUPS.keys()),
-        format_func=lambda g: f"Group {g}  ·  {'  '.join(wc.FLAGS.get(t,'') for t in wc.GROUPS[g])}",
+        format_func=lambda g: f"Group {g}  ·  {', '.join(_FLAG_ISO.get(t,'??').upper() for t in wc.GROUPS[g])}",
     )
 
     st.html("<hr>")
@@ -792,12 +807,12 @@ with st.sidebar:
                         f'text-transform:uppercase;letter-spacing:.07em;'
                         f'color:{C["sub"]};margin:8px 0 4px;">{_label}</div>'
                     )
-                fh = wc.FLAGS.get(h, ""); fa = wc.FLAGS.get(a, "")
+                fh = flag_html(h, "0.8rem"); fa = flag_html(a, "0.8rem")
                 ws = f"color:{C['green']};font-weight:600"
                 hs = ws if gh > ga else ""
                 as_ = ws if ga > gh else ""
                 _html_rows.append(
-                    f'<div style="font-size:11px;padding:2px 0;display:flex;gap:6px">'
+                    f'<div style="font-size:11px;padding:2px 0;display:flex;gap:6px;align-items:center">'
                     f'<span style="{hs}">{fh} {h}</span>'
                     f'<span style="color:{C["sub"]}">{gh}–{ga}</span>'
                     f'<span style="{as_}">{fa} {a}</span></div>'
@@ -917,21 +932,6 @@ def _fetch_wiki_photo(name: str) -> str | None:
         pass
     return None
 
-_FLAG_ISO = {
-    "France":"fr",      "Spain":"es",       "Portugal":"pt",     "England":"gb-eng",
-    "Germany":"de",     "Brazil":"br",      "Argentina":"ar",    "Netherlands":"nl",
-    "Belgium":"be",     "Croatia":"hr",     "Morocco":"ma",      "Uruguay":"uy",
-    "Switzerland":"ch", "Japan":"jp",       "USA":"us",          "Colombia":"co",
-    "South Korea":"kr", "Mexico":"mx",      "Canada":"ca",       "Ecuador":"ec",
-    "Senegal":"sn",     "Norway":"no",      "Austria":"at",      "Turkey":"tr",
-    "Australia":"au",   "Saudi Arabia":"sa","Iran":"ir",         "Egypt":"eg",
-    "Ghana":"gh",       "Tunisia":"tn",     "Paraguay":"py",     "Sweden":"se",
-    "Scotland":"gb-sct","Ivory Coast":"ci", "Czechia":"cz",      "Bosnia":"ba",
-    "Qatar":"qa",       "Haiti":"ht",       "Algeria":"dz",      "Jordan":"jo",
-    "Iraq":"iq",        "Curacao":"cw",     "New Zealand":"nz",  "South Africa":"za",
-    "Congo DR":"cd",    "Uzbekistan":"uz",  "Cabo Verde":"cv",   "Panama":"pa",
-}
-
 def flag_html(team, size="1.8rem"):
     """Return real country flag image (flagcdn.com) or emoji fallback."""
     iso = _FLAG_ISO.get(team)
@@ -1050,8 +1050,8 @@ _actual_res = st.session_state.get("actual_results", {})
 if _actual_res:
     _ticker_items = []
     for (h, a), (sh, sa) in sorted(_actual_res.items()):
-        hf = wc.FLAGS.get(h, "")
-        af = wc.FLAGS.get(a, "")
+        hf = flag_html(h, "0.85rem")
+        af = flag_html(a, "0.85rem")
         _ticker_items.append(
             f'<span class="ticker-item">{hf} {h}'
             f' <span class="ticker-score">{sh} – {sa}</span>'
@@ -1462,7 +1462,7 @@ with tabs[3]:
             _rows_html = ""
             for _rank, (_team, _s) in enumerate(_standings, 1):
                 _gd  = _s["GF"] - _s["GA"]
-                _fl  = wc.FLAGS.get(_team, "")
+                _fl  = flag_html(_team, "0.9rem")
                 _win_pct = probs.get(_team, {}).get("p_win", 0)
                 _q_pct   = probs.get(_team, {}).get("p_r16", 0)
                 _qual_col = C["green"] if _rank <= 2 else (C["yellow"] if _rank == 3 else C["sub"])
@@ -1545,7 +1545,7 @@ with tabs[4]:
     st.html(f"""
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
         <h2 style="font-size:1rem;font-weight:500;color:{C['text']}">Group {selected_group}</h2>
-        {''.join(f'<span style="font-size:1.5rem">{wc.FLAGS.get(t,"")}</span>' for t in teams_g)}
+        {''.join(flag_html(t, "1.5rem") for t in teams_g)}
         <span class="chip">avg Elo <span class="mono">{avg_elo}</span></span>
     </div>
     """)
@@ -2207,7 +2207,7 @@ with tabs[6]:
         # Pick best by win probability
         _pick = max(_candidates, key=lambda t: probs.get(t, {}).get("p_win", 0))
         _pp   = probs.get(_pick, {})
-        _pf   = wc.FLAGS.get(_pick, "")
+        _pf = flag_html(_pick, "2.8rem")
         _pwin = _pp.get("p_win", 0)
         _pq   = _pp.get("p_r16", 0)
         _psf  = _pp.get("p_sf", 0)
@@ -2227,7 +2227,7 @@ with tabs[6]:
         <div style="background:linear-gradient(135deg,rgba(79,158,255,.12),rgba(167,139,250,.08));
                     border:1px solid rgba(79,158,255,.3);border-radius:16px;
                     padding:28px 24px;margin:20px 0;text-align:center;">
-          <div style="font-size:3rem;margin-bottom:4px">{_pf}</div>
+          <div style="margin-bottom:4px;line-height:1">{_pf}</div>
           <div style="font-size:1.8rem;font-weight:800;color:{C['text']};margin-bottom:4px">{_pick}</div>
           <div style="font-size:12px;color:{C['sub']};margin-bottom:16px">Your perfect match</div>
           <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
@@ -2256,11 +2256,11 @@ with tabs[6]:
             _alt_html = ""
             for _rt in _runners:
                 _rp   = probs.get(_rt, {}).get("p_win", 0)
-                _rf   = wc.FLAGS.get(_rt, "")
+                _rf = flag_html(_rt, "1.4rem")
                 _alt_html += f"""
                 <div style="background:{C['card']};border:1px solid {C['border']};
                              border-radius:10px;padding:12px 16px;text-align:center">
-                  <div style="font-size:1.4rem">{_rf}</div>
+                  <div style="line-height:1;margin-bottom:2px">{_rf}</div>
                   <div style="font-size:12px;font-weight:600;color:{C['text']};margin-top:4px">{_rt}</div>
                   <div style="font-size:11px;color:{C['accent']};margin-top:2px">{_rp:.1f}% win</div>
                 </div>"""

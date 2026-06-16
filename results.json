@@ -1,0 +1,107 @@
+[
+  {
+    "home": "Mexico",
+    "away": "South Africa",
+    "score_h": 2,
+    "score_a": 0,
+    "date": "20260611"
+  },
+  {
+    "home": "South Korea",
+    "away": "Czechia",
+    "score_h": 2,
+    "score_a": 1,
+    "date": "20260611"
+  },
+  {
+    "home": "Canada",
+    "away": "Bosnia",
+    "score_h": 1,
+    "score_a": 1,
+    "date": "20260612"
+  },
+  {
+    "home": "USA",
+    "away": "Paraguay",
+    "score_h": 4,
+    "score_a": 1,
+    "date": "20260612"
+  },
+  {
+    "home": "Brazil",
+    "away": "Morocco",
+    "score_h": 1,
+    "score_a": 1,
+    "date": "20260613"
+  },
+  {
+    "home": "Haiti",
+    "away": "Scotland",
+    "score_h": 0,
+    "score_a": 1,
+    "date": "20260613"
+  },
+  {
+    "home": "Qatar",
+    "away": "Switzerland",
+    "score_h": 1,
+    "score_a": 1,
+    "date": "20260613"
+  },
+  {
+    "home": "Australia",
+    "away": "Turkey",
+    "score_h": 2,
+    "score_a": 0,
+    "date": "20260614"
+  },
+  {
+    "home": "Germany",
+    "away": "Curacao",
+    "score_h": 7,
+    "score_a": 1,
+    "date": "20260614"
+  },
+  {
+    "home": "Ivory Coast",
+    "away": "Ecuador",
+    "score_h": 1,
+    "score_a": 0,
+    "date": "20260614"
+  },
+  {
+    "home": "Netherlands",
+    "away": "Japan",
+    "score_h": 2,
+    "score_a": 2,
+    "date": "20260614"
+  },
+  {
+    "home": "Sweden",
+    "away": "Tunisia",
+    "score_h": 5,
+    "score_a": 1,
+    "date": "20260614"
+  },
+  {
+    "home": "Belgium",
+    "away": "Egypt",
+    "score_h": 1,
+    "score_a": 1,
+    "date": "20260615"
+  },
+  {
+    "home": "Saudi Arabia",
+    "away": "Uruguay",
+    "score_h": 1,
+    "score_a": 1,
+    "date": "20260615"
+  },
+  {
+    "home": "Spain",
+    "away": "Cabo Verde",
+    "score_h": 0,
+    "score_a": 0,
+    "date": "20260615"
+  }
+]

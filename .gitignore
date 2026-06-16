@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Dev/debug scripts
+_fix_html.py
+_verify.py
+_bump_cache.py
+
+# Streamlit process logs
+streamlit_out.txt
+streamlit_err.txt
+
+# Generated chart PNGs (CLI only)
+wc2026_*.png
+
+# Claude Code
+.claude/

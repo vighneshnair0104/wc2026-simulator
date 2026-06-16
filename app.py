@@ -13,7 +13,7 @@ except ImportError:
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
-import json, urllib.request, urllib.parse
+import json, math, urllib.request, urllib.parse
 from datetime import datetime, timezone
 from itertools import combinations
 
@@ -1635,9 +1635,26 @@ with tabs[3]:
         (_bt8[4],_bt8[5]), (_bt8[6],_bt8[7]),
     ]
 
-    def _elo_wp(t1, t2):
-        e1, e2 = wc.ELO.get(t1, 1600), wc.ELO.get(t2, 1600)
-        return round(100 / (1 + 10**((e2-e1)/400)), 1)
+    def _model_wp(t1, t2):
+        """Win probability for t1 using the full 80-variable Poisson model
+        (same expected_goals function as the Monte Carlo simulation)."""
+        try:
+            la, lb = wc.expected_goals(t1, t2, neutral=True)
+            # Precompute Poisson pmf up to 10 goals for each team
+            pk_a = [math.exp(-la) * la**i / math.factorial(i) for i in range(10)]
+            pk_b = [math.exp(-lb) * lb**j / math.factorial(j) for j in range(10)]
+            p_win = p_lose = 0.0
+            for i in range(10):
+                for j in range(10):
+                    p = pk_a[i] * pk_b[j]
+                    if i > j: p_win += p
+                    elif j > i: p_lose += p
+            total = p_win + p_lose
+            # Normalise: in KO there's always a winner (draws go to ET/pens, ~50/50)
+            return round(p_win / total * 100, 1) if total > 0 else 50.0
+        except Exception:
+            e1, e2 = wc.ELO.get(t1, 1600), wc.ELO.get(t2, 1600)
+            return round(100 / (1 + 10**((e2-e1)/400)), 1)
 
     def _resolve(t1, t2):
         """Returns (winner, p1%, p2%, confirmed, score_str)."""
@@ -1648,8 +1665,8 @@ with tabs[3]:
                     break  # draw in KO = ET/pens, fall through to prediction
                 won = h if gh > ga else a
                 sc  = f"{gh}–{ga}" if h==t1 else f"{ga}–{gh}"
-                return won, _elo_wp(t1,t2), 100-_elo_wp(t1,t2), True, sc
-        p1 = _elo_wp(t1, t2)
+                return won, _model_wp(t1,t2), 100-_model_wp(t1,t2), True, sc
+        p1 = _model_wp(t1, t2)
         return (t1 if p1>=50 else t2), p1, 100-p1, False, None
 
     def _sim_rnd(pairs):

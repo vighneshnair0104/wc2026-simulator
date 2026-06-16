@@ -15,5 +15,8 @@ streamlit_err.txt
 # Generated chart PNGs (CLI only)
 wc2026_*.png
 
+# Secrets — never commit
+.streamlit/secrets.toml
+
 # Claude Code
 .claude/

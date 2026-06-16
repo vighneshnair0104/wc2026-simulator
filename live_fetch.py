@@ -1,6 +1,8 @@
 """
 Live score fetcher for WC 2026.
-Pulls completed results from ESPN's public API and persists them to results.json.
+Pulls completed results from ESPN's public API and persists them to Supabase
+(if SUPABASE_URL / SUPABASE_KEY env vars are set) or falls back to results.json
+for local development.
 """
 import json
 import os
@@ -56,6 +58,23 @@ def _norm(name: str) -> str:
     return _NORM.get(name, name)
 
 
+# ── Supabase client ───────────────────────────────────────────────────────────
+
+def _supabase():
+    """Return a Supabase client or None if credentials are not set."""
+    url = os.environ.get("SUPABASE_URL", "").strip()
+    key = os.environ.get("SUPABASE_KEY", "").strip()
+    if not url or not key:
+        return None
+    try:
+        from supabase import create_client
+        return create_client(url, key)
+    except Exception:
+        return None
+
+
+# ── ESPN fetching (unchanged) ─────────────────────────────────────────────────
+
 def _fetch_date(date_str: str) -> list[dict]:
     """Fetch completed matches for a single YYYYMMDD date string."""
     url = _ESPN_BASE.format(date=date_str)
@@ -98,14 +117,12 @@ def fetch_all_scores() -> tuple[list[dict], str | None]:
     Returns (list_of_results, error_message_or_None).
     """
     today = datetime.now(timezone.utc).strftime("%Y%m%d")
-    errors = []
     all_results = []
 
     for d in WC_DATES:
         if d > today:
             break
-        matches = _fetch_date(d)
-        all_results.extend(matches)
+        all_results.extend(_fetch_date(d))
 
     if not all_results and WC_DATES[0] <= today:
         return [], "No results returned — ESPN API may be unavailable"
@@ -113,8 +130,19 @@ def fetch_all_scores() -> tuple[list[dict], str | None]:
     return all_results, None
 
 
+# ── Persistence: Supabase with JSON fallback ──────────────────────────────────
+
 def load_results() -> dict:
-    """Load persisted results from JSON. Returns {(home, away): (score_h, score_a)}."""
+    """Load persisted results. Returns {(home, away): (score_h, score_a)}."""
+    sb = _supabase()
+    if sb:
+        try:
+            rows = sb.table("match_results").select("*").execute().data
+            return {(r["home"], r["away"]): (r["score_h"], r["score_a"]) for r in rows}
+        except Exception:
+            pass
+
+    # Local fallback
     if not os.path.exists(RESULTS_FILE):
         return {}
     try:
@@ -126,19 +154,41 @@ def load_results() -> dict:
 
 
 def save_results(results_dict: dict, date_map: dict | None = None) -> None:
-    """Persist results dict to JSON file. date_map: {(home,away): 'YYYYMMDD'}"""
-    raw = [
-        {"home": h, "away": a, "score_h": gh, "score_a": ga,
-         **({"date": date_map[(h, a)]} if date_map and (h, a) in date_map else {})}
+    """Persist results via Supabase upsert or fallback to JSON file."""
+    today = datetime.now(timezone.utc).strftime("%Y%m%d")
+    rows = [
+        {
+            "home": h, "away": a,
+            "score_h": gh, "score_a": ga,
+            "date": (date_map or {}).get((h, a), today),
+        }
         for (h, a), (gh, ga) in results_dict.items()
     ]
-    raw.sort(key=lambda r: (r.get("date", "99999999"), r["home"]))
+
+    sb = _supabase()
+    if sb:
+        try:
+            sb.table("match_results").upsert(rows, on_conflict="home,away").execute()
+            return
+        except Exception:
+            pass
+
+    # Local fallback
+    rows.sort(key=lambda r: (r.get("date", "99999999"), r["home"]))
     with open(RESULTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(raw, f, indent=2)
+        json.dump(rows, f, indent=2)
 
 
 def load_date_map() -> dict:
     """Return {(home, away): 'YYYYMMDD'} from persisted results."""
+    sb = _supabase()
+    if sb:
+        try:
+            rows = sb.table("match_results").select("home,away,date").execute().data
+            return {(r["home"], r["away"]): r["date"] for r in rows}
+        except Exception:
+            pass
+
     if not os.path.exists(RESULTS_FILE):
         return {}
     try:
@@ -181,7 +231,6 @@ def refresh_from_api(current: dict) -> tuple[dict, int, str | None]:
             updated[key] = (r["score_h"], r["score_a"])
             added += 1
 
-    # Always persist date info so the sidebar can sort chronologically
     existing_dates = load_date_map()
     merged_dates   = {**existing_dates, **new_dates}
     save_results(updated, merged_dates)

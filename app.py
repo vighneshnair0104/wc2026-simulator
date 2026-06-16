@@ -13,6 +13,12 @@ from itertools import combinations
 import WC_v2 as wc
 import live_fetch as lf
 
+# Inject Supabase credentials from Streamlit secrets into env vars
+# so live_fetch can access them without importing streamlit directly.
+for _k in ("SUPABASE_URL", "SUPABASE_KEY"):
+    if _k in st.secrets and not os.environ.get(_k):
+        os.environ[_k] = st.secrets[_k]
+
 st.set_page_config(
     page_title="WC 2026 · Analytics",
     page_icon="⚽",

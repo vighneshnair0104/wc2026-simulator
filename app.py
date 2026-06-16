@@ -1696,6 +1696,22 @@ with tabs[3]:
         bg2 = "background:rgba(79,158,255,0.11);" if w==t2 else ""
         fc1 = C["text"] if w==t1 else C["sub"]
         fc2 = C["text"] if w==t2 else C["sub"]
+        # Simulation win% chips — from Monte Carlo, not this specific matchup
+        def _sim_chip(t):
+            pw = probs.get(t, {}).get("p_win", 0)
+            if pw >= 10:
+                col = C["gold"]
+            elif pw >= 4:
+                col = C["accent"]
+            else:
+                col = C["muted"]
+            return (f'<span style="font-size:8px;font-family:monospace;'
+                    f'color:{col};background:rgba(255,255,255,.05);'
+                    f'border-radius:3px;padding:1px 5px;flex-shrink:0;'
+                    f'white-space:nowrap;">sim {pw:.1f}%</span>')
+
+        sc1, sc2 = _sim_chip(t1), _sim_chip(t2)
+
         if cf:
             pc1 = (f'<span style="font-size:10px;font-weight:700;color:{C["green"]};">'
                    f'{"✓" if w==t1 else ""}</span>')
@@ -1713,21 +1729,35 @@ with tabs[3]:
             foot = (f'<div style="padding:4px 10px;background:rgba(79,158,255,.04);'
                     f'border-top:1px solid rgba(79,158,255,.1);">'
                     f'<span style="font-size:9px;font-weight:700;color:{C["accent"]};">'
-                    f'→ {w} advances (ELO model)</span></div>')
+                    f'→ {w} advances · full model</span></div>')
         lh = (f'<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;'
               f'color:{C["sub"]};padding:3px 10px;background:rgba(255,255,255,.02);'
               f'border-bottom:1px solid rgba(255,255,255,.05);">{label}</div>') if label else ""
         return (f'<div style="border:1px solid rgba(255,255,255,.09);border-radius:9px;overflow:hidden;'
                 f'background:rgba(22,22,26,.88);margin-bottom:6px;">'
                 f'{lh}'
-                f'<div style="display:flex;align-items:center;gap:7px;padding:7px 11px;{bg1}">'
+                f'<div style="display:flex;align-items:center;gap:6px;padding:7px 11px;{bg1}">'
                 f'{f1}<span style="font-size:11px;color:{fc1};flex:1;overflow:hidden;'
-                f'text-overflow:ellipsis;white-space:nowrap;">{t1}</span>{pc1}</div>'
+                f'text-overflow:ellipsis;white-space:nowrap;">{t1}</span>{sc1}{pc1}</div>'
                 f'<div style="height:1px;background:rgba(255,255,255,.06);"></div>'
-                f'<div style="display:flex;align-items:center;gap:7px;padding:7px 11px;{bg2}">'
+                f'<div style="display:flex;align-items:center;gap:6px;padding:7px 11px;{bg2}">'
                 f'{f2}<span style="font-size:11px;color:{fc2};flex:1;overflow:hidden;'
-                f'text-overflow:ellipsis;white-space:nowrap;">{t2}</span>{pc2}</div>'
+                f'text-overflow:ellipsis;white-space:nowrap;">{t2}</span>{sc2}{pc2}</div>'
                 f'{foot}</div>')
+
+    # ── Bracket vs simulation explainer ──────────────────────────────────────
+    st.html(f"""
+<div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);
+            border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;
+            color:{C['text']};line-height:1.6;">
+  <span style="font-weight:700;color:{C['gold']};">ℹ Why might a top-3 team not reach the QF here?</span><br>
+  The bracket picks the <b>single most likely winner</b> in each match — one deterministic path.
+  A team like Portugal (sim 14%) can have high tournament win% because across 20,000+ simulations
+  they reach the QF via many <i>different</i> paths (France loses earlier, easier half of the draw, etc.).
+  In this particular "most likely" bracket, Portugal runs into France in R16.
+  The <b style="color:{C['gold']};">sim X%</b> badge on each team shows their Monte Carlo win probability —
+  use that to judge overall strength regardless of bracket placement.
+</div>""")
 
     # ── Sub-tabs: one per round ───────────────────────────────────────────────
     _rnd_tabs = st.tabs(["🏆 Summary", "Round of 32", "Round of 16", "Quarterfinals", "Semifinals", "Final"])

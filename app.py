@@ -489,6 +489,141 @@ hr {{ border-color: {C['border']} !important; margin: 1.2rem 0 !important; }}
   filter:brightness(.92) saturate(1.1);
   display:block;
 }}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE  (≤ 768 px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {{
+
+  /* ── Stack ALL Streamlit columns vertically ── */
+  [data-testid="stHorizontalBlock"] {{
+    flex-direction: column !important;
+    gap: 10px !important;
+  }}
+  [data-testid="column"] {{
+    width: 100% !important;
+    min-width: 100% !important;
+    flex: 1 1 100% !important;
+  }}
+
+  /* ── Padding ── */
+  [data-testid="block-container"] {{
+    padding: 0.6rem 0.75rem 3rem !important;
+  }}
+  section[data-testid="stSidebar"] {{
+    padding: 1rem 0.75rem !important;
+  }}
+
+  /* ── Archival background ── */
+  .wc-archival {{ height: 200px !important; }}
+  .wc-beam, .wc-orb {{ display: none !important; }}
+  .wc-year {{ font-size: clamp(48px,9vw,72px) !important; opacity:.05 !important; }}
+  .wc-trophy {{ font-size: 2.4rem !important; top: 4% !important; }}
+  .wc-grid {{ opacity: .3 !important; }}
+
+  /* ── Typography ── */
+  .wc-title {{ font-size: clamp(1.1rem,4.5vw,1.4rem) !important; }}
+  .sec-label {{
+    font-size: 9px !important;
+    letter-spacing: .07em !important;
+    margin: 14px 0 8px !important;
+  }}
+
+  /* ── Tabs: horizontal scroll ── */
+  [data-testid="stTabs"] [data-baseweb="tab-list"] {{
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0 !important;
+    padding-bottom: 2px;
+  }}
+  [data-testid="stTabs"] [data-baseweb="tab-list"]::-webkit-scrollbar {{
+    display: none;
+  }}
+  [data-testid="stTabs"] button {{
+    padding: 8px 11px !important;
+    font-size: 9px !important;
+    white-space: nowrap !important;
+    letter-spacing: .02em !important;
+  }}
+
+  /* ── Chips ── */
+  .chip {{
+    font-size: 9px !important;
+    padding: 2px 7px !important;
+  }}
+
+  /* ── Winner card ── */
+  .winner-card {{
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    align-items: flex-start !important;
+  }}
+  .winner-name {{ font-size: 1.5rem !important; }}
+  .winner-pct  {{ font-size: 2.2rem !important; }}
+  .winner-flag {{ font-size: 2.5rem !important; }}
+  .winner-rank {{ font-size: 9px !important; }}
+  .winner-sub  {{ font-size: 9px !important; }}
+
+  /* ── Probability cards (5-wide → 1-wide via column rule) ── */
+  .prob-card {{ padding: 14px 10px !important; }}
+  .prob-card-pct {{ font-size: 1.4rem !important; }}
+  .prob-card-name {{ font-size: 11px !important; }}
+
+  /* ── Contender cards ── */
+  .contender-card {{ padding: 10px 8px !important; }}
+
+  /* ── Awards: player art / hero ── */
+  .player-photo-wrap {{
+    max-width: 240px !important;
+    margin: 0 auto !important;
+  }}
+  .player-art {{ min-height: 190px !important; }}
+  .player-art-initial {{ font-size: 3.2rem !important; }}
+  .cinema-glass {{ padding: 16px !important; }}
+  .why-panel {{ padding: 14px 12px !important; }}
+  .awd-bar-track {{ height: 3px !important; margin: 5px 0 3px !important; }}
+
+  /* ── Buttons / inputs ── */
+  [data-testid="stButton"] > button {{
+    font-size: 11px !important;
+    padding: 8px 12px !important;
+    min-height: 40px !important;
+  }}
+  [data-testid="stSlider"] {{ margin: 6px 0 !important; }}
+  .stSelectbox > div {{ font-size: 12px !important; }}
+
+  /* ── Plotly charts: cap height ── */
+  .js-plotly-plot .plotly {{ max-height: 280px; }}
+
+  /* ── Expanders ── */
+  [data-testid="stExpander"] {{
+    margin: 4px 0 !important;
+  }}
+  [data-testid="stExpander"] summary {{
+    font-size: 11px !important;
+    padding: 8px 12px !important;
+  }}
+}}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SMALL PHONES  (≤ 400 px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 400px) {{
+  [data-testid="block-container"] {{
+    padding: 0.4rem 0.5rem 3rem !important;
+  }}
+  .wc-title {{ font-size: 1rem !important; }}
+  [data-testid="stTabs"] button {{
+    font-size: 8px !important;
+    padding: 7px 8px !important;
+  }}
+  .chip {{ font-size: 8px !important; padding: 2px 5px !important; }}
+  .winner-name {{ font-size: 1.2rem !important; }}
+  .winner-pct  {{ font-size: 1.8rem !important; }}
+}}
 </style>
 """)
 

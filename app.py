@@ -683,6 +683,19 @@ _FLAG_ISO = {
     "Congo DR":"cd",    "Uzbekistan":"uz",  "Cabo Verde":"cv",   "Panama":"pa",
 }
 
+def flag_html(team, size="1.8rem"):
+    """Return real country flag image (flagcdn.com) or emoji fallback."""
+    iso = _FLAG_ISO.get(team)
+    if iso:
+        return (f'<img src="https://flagcdn.com/w80/{iso}.png" alt="{team}" '
+                f'style="height:{size};width:auto;vertical-align:middle;'
+                f'border-radius:2px;display:inline-block;">')
+    fl = wc.FLAGS.get(team, "")
+    if not fl:
+        return ""
+    return f'<span style="font-size:{size};line-height:1;vertical-align:middle">{fl}</span>'
+
+
 def _dh(html: str) -> str:
     """Strip common leading whitespace so the opening HTML tag starts at column 0.
     Streamlit 1.44+ requires block-level HTML (<div> etc.) at column 0-3 max."""
@@ -931,18 +944,6 @@ def _fetch_wiki_photo(name: str) -> str | None:
     except Exception:
         pass
     return None
-
-def flag_html(team, size="1.8rem"):
-    """Return real country flag image (flagcdn.com) or emoji fallback."""
-    iso = _FLAG_ISO.get(team)
-    if iso:
-        return (f'<img src="https://flagcdn.com/w80/{iso}.png" alt="{team}" '
-                f'style="height:{size};width:auto;vertical-align:middle;'
-                f'border-radius:2px;display:inline-block;">')
-    fl = wc.FLAGS.get(team, "")
-    if not fl:
-        return ""
-    return f'<span style="font-size:{size};line-height:1;vertical-align:middle">{fl}</span>'
 
 # Standard FIFA group-stage round-robin schedule order:
 # MD1: (0v1), (2v3)  MD2: (0v2), (1v3)  MD3: (0v3), (1v2)

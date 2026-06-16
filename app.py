@@ -997,6 +997,68 @@ st.html(f"""
 """)
 
 # ══════════════════════════════════════════════════════════════════════════════
+# ① b  LIVE SCORE TICKER
+# ══════════════════════════════════════════════════════════════════════════════
+_actual_res = st.session_state.get("actual_results", {})
+if _actual_res:
+    _ticker_items = []
+    for (h, a), (sh, sa) in sorted(_actual_res.items()):
+        hf = wc.FLAGS.get(h, "")
+        af = wc.FLAGS.get(a, "")
+        _ticker_items.append(
+            f'<span class="ticker-item">{hf} {h}'
+            f' <span class="ticker-score">{sh} – {sa}</span>'
+            f' {a} {af}</span>'
+            f'<span class="ticker-sep">✦</span>'
+        )
+    _ticker_html = "".join(_ticker_items * 3)
+    _anim_dur = max(20, len(_actual_res) * 4)
+    st.html(f"""
+<style>
+.ticker-wrap {{
+    overflow:hidden;position:relative;
+    background:linear-gradient(90deg,rgba(79,158,255,.06),rgba(167,139,250,.06));
+    border:1px solid {C['border']};border-radius:8px;
+    padding:9px 0;margin-bottom:16px;
+}}
+.ticker-wrap::before,.ticker-wrap::after {{
+    content:'';position:absolute;top:0;bottom:0;width:48px;z-index:2;
+}}
+.ticker-wrap::before{{left:0;background:linear-gradient(90deg,{C['bg']},transparent);}}
+.ticker-wrap::after{{right:0;background:linear-gradient(-90deg,{C['bg']},transparent);}}
+.ticker-track {{
+    display:flex;gap:0;white-space:nowrap;width:max-content;
+    animation:ticker-scroll {_anim_dur}s linear infinite;
+}}
+.ticker-track:hover {{animation-play-state:paused;}}
+@keyframes ticker-scroll{{0%{{transform:translateX(0)}}100%{{transform:translateX(-33.333%)}}}}
+.ticker-item {{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:500;color:{C['text']};padding:0 14px;
+}}
+.ticker-score {{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+    color:{C['accent']};background:rgba(79,158,255,.12);
+    padding:1px 7px;border-radius:4px;
+}}
+.ticker-sep {{color:rgba(255,255,255,.18);font-size:10px;padding:0 4px;}}
+.ticker-label {{
+    position:absolute;left:0;top:0;bottom:0;
+    display:flex;align-items:center;padding:0 12px;z-index:3;
+    font-size:9px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:{C['green']};
+    background:{C['bg']};border-right:1px solid {C['border']};
+}}
+</style>
+<div class="ticker-wrap">
+  <div class="ticker-label">🔴 LIVE</div>
+  <div style="padding-left:56px;overflow:hidden;">
+    <div class="ticker-track">{_ticker_html}</div>
+  </div>
+</div>
+""")
+
+# ══════════════════════════════════════════════════════════════════════════════
 # ② SIMULATION METADATA
 # ══════════════════════════════════════════════════════════════════════════════
 _n_actual   = len(st.session_state.get("actual_results", {}))
@@ -1105,7 +1167,7 @@ st.html("<br>")
 # ══════════════════════════════════════════════════════════════════════════════
 # ⑤ NAVIGATION TABS
 # ══════════════════════════════════════════════════════════════════════════════
-tabs = st.tabs(["Tournament", "Stage Records", "Groups", "Match Predictions", "Team Profile", "Awards"])
+tabs = st.tabs(["Tournament", "Stage Records", "Groups", "Bracket", "Match Predictions", "Team Profile", "Find My Team", "Awards"])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1315,9 +1377,117 @@ with tabs[2]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 4 · MATCH PREDICTIONS
+# TAB 4 · BRACKET
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[3]:
+    st.html('<div class="sec-label">Group Stage Standings · Based on Locked Results + Simulation</div>')
+
+    # Build standings from actual results
+    def _build_standings(group_teams, actual):
+        rows = {t: {"P":0,"W":0,"D":0,"L":0,"GF":0,"GA":0,"Pts":0} for t in group_teams}
+        for (h, a), (sh, sa) in actual.items():
+            if h in rows and a in rows:
+                rows[h]["P"] += 1; rows[a]["P"] += 1
+                rows[h]["GF"] += sh; rows[h]["GA"] += sa
+                rows[a]["GF"] += sa; rows[a]["GA"] += sh
+                if sh > sa:
+                    rows[h]["W"] += 1; rows[h]["Pts"] += 3
+                    rows[a]["L"] += 1
+                elif sh == sa:
+                    rows[h]["D"] += 1; rows[h]["Pts"] += 1
+                    rows[a]["D"] += 1; rows[a]["Pts"] += 1
+                else:
+                    rows[a]["W"] += 1; rows[a]["Pts"] += 3
+                    rows[h]["L"] += 1
+        return sorted(rows.items(), key=lambda x: (-x[1]["Pts"], -(x[1]["GF"]-x[1]["GA"]), -x[1]["GF"]))
+
+    _actual = st.session_state.get("actual_results", {})
+    _grp_cols = st.columns(3, gap="medium")
+    _grp_list = list(wc.GROUPS.items())
+    for _gi, (grp, teams) in enumerate(_grp_list):
+        _col = _grp_cols[_gi % 3]
+        with _col:
+            _standings = _build_standings(teams, _actual)
+            _rows_html = ""
+            for _rank, (_team, _s) in enumerate(_standings, 1):
+                _gd  = _s["GF"] - _s["GA"]
+                _fl  = wc.FLAGS.get(_team, "")
+                _win_pct = probs.get(_team, {}).get("p_win", 0)
+                _q_pct   = probs.get(_team, {}).get("p_r16", 0)
+                _qual_col = C["green"] if _rank <= 2 else (C["yellow"] if _rank == 3 else C["sub"])
+                _rows_html += f"""
+                <tr>
+                  <td style="color:{_qual_col};font-weight:700;padding:5px 4px">{_rank}</td>
+                  <td style="padding:5px 4px">{_fl} {_team}</td>
+                  <td style="text-align:center;color:{C['sub']};padding:5px 4px">{_s['P']}</td>
+                  <td style="text-align:center;color:{C['sub']};padding:5px 4px">{_s['W']}</td>
+                  <td style="text-align:center;color:{C['sub']};padding:5px 4px">{_s['D']}</td>
+                  <td style="text-align:center;color:{C['sub']};padding:5px 4px">{_s['L']}</td>
+                  <td style="text-align:center;color:{C['sub']};padding:5px 4px">{_gd:+d}</td>
+                  <td style="text-align:center;font-weight:700;color:{C['accent']};padding:5px 4px">{_s['Pts']}</td>
+                  <td style="text-align:right;color:{C['green']};font-size:10px;padding:5px 4px">{_q_pct:.0f}%</td>
+                </tr>"""
+            st.html(f"""
+            <div style="background:{C['card']};border:1px solid {C['border']};border-radius:10px;
+                        padding:12px 14px;margin-bottom:12px">
+              <div style="font-size:11px;font-weight:700;color:{C['accent']};
+                          letter-spacing:.06em;margin-bottom:8px">GROUP {grp}</div>
+              <table style="width:100%;border-collapse:collapse;font-size:11px;color:{C['text']}">
+                <thead><tr style="border-bottom:1px solid {C['border']}">
+                  <th style="text-align:left;color:{C['sub']};padding:3px 4px">#</th>
+                  <th style="text-align:left;color:{C['sub']};padding:3px 4px">Team</th>
+                  <th style="color:{C['sub']};padding:3px 4px">P</th>
+                  <th style="color:{C['sub']};padding:3px 4px">W</th>
+                  <th style="color:{C['sub']};padding:3px 4px">D</th>
+                  <th style="color:{C['sub']};padding:3px 4px">L</th>
+                  <th style="color:{C['sub']};padding:3px 4px">GD</th>
+                  <th style="color:{C['sub']};padding:3px 4px">Pts</th>
+                  <th style="text-align:right;color:{C['sub']};padding:3px 4px">Q%</th>
+                </tr></thead>
+                <tbody>{_rows_html}</tbody>
+              </table>
+              <div style="margin-top:6px;font-size:9px;color:{C['muted']}">
+                🟢 Projected qualifiers &nbsp;·&nbsp; Q% = simulated qualify probability
+              </div>
+            </div>""")
+
+    st.html('<div class="sec-label" style="margin-top:8px">Projected Knockout Bracket · Top 8 Contenders</div>')
+    _top8 = srt[:8]
+    _bracket_html = ""
+    for _bi in range(0, 8, 2):
+        _t1, _p1 = _top8[_bi]
+        _t2, _p2 = _top8[_bi + 1] if _bi + 1 < len(_top8) else ("TBD", {})
+        _f1, _f2 = wc.FLAGS.get(_t1,""), wc.FLAGS.get(_t2,"")
+        _pct1, _pct2 = _p1.get("p_win",0), _p2.get("p_win",0) if isinstance(_p2,dict) else 0
+        _bracket_html += f"""
+        <div style="background:{C['card']};border:1px solid {C['border']};border-radius:10px;
+                    padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px">{_f1} <b style="color:{C['text']}">{_t1}</b></span>
+            <span style="font-family:monospace;font-size:12px;color:{C['accent']};
+                         background:rgba(79,158,255,.1);padding:2px 8px;border-radius:4px">{_pct1:.1f}%</span>
+          </div>
+          <div style="height:1px;background:{C['border']}"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px">{_f2} <b style="color:{C['text']}">{_t2}</b></span>
+            <span style="font-family:monospace;font-size:12px;color:{C['accent']};
+                         background:rgba(79,158,255,.1);padding:2px 8px;border-radius:4px">{_pct2:.1f}%</span>
+          </div>
+        </div>"""
+    st.html(f"""
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+                gap:12px;margin-top:4px">
+      {_bracket_html}
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:{C['muted']}">
+      Bracket based on simulation championship probabilities · Updates live as results come in
+    </div>""")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TAB 4 · MATCH PREDICTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+with tabs[4]:
     teams_g = wc.GROUPS[selected_group]
     avg_elo = sum(wc.ELO.get(t, 0) for t in teams_g) // 4
 
@@ -1417,7 +1587,7 @@ with tabs[3]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 5 · TEAM PROFILE  (Redesigned — cinematic, team-colour grading)
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[4]:
+with tabs[5]:
     # ── Team colour map: (primary glow/accent, secondary gradient tail) ──────
     _TC = {
         "France":       ("#3060E0", "#ED2939"),
@@ -1909,9 +2079,160 @@ with tabs[4]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 6 · AWARDS  (Cinematic redesign — hero player art, why-panel, contenders)
+# TAB 7 · FIND MY TEAM
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[5]:
+with tabs[6]:
+    st.html(f"""
+    <div style="text-align:center;padding:24px 0 8px">
+      <div style="font-size:2rem;margin-bottom:8px">🔍</div>
+      <div style="font-size:1.4rem;font-weight:700;color:{C['text']}">Find Your Team</div>
+      <div style="font-size:13px;color:{C['sub']};margin-top:6px">
+        Answer 3 questions — we'll match you with a team to root for
+      </div>
+    </div>""")
+
+    _q1 = st.radio(
+        "① What style of football excites you most?",
+        ["⚡ High-octane attacking — goals, flair, chaos",
+         "🛡️ Solid defense — grind it out, late winners",
+         "🎭 Silky possession — pass-and-move artistry",
+         "🏃 Lightning counter-attacks — pace and precision"],
+        index=None, key="fmq1"
+    )
+    _q2 = st.radio(
+        "② Which region do you want to see win?",
+        ["🌍 Europe", "🌎 South America", "🌍 Africa / Middle East", "🌏 Asia / North America"],
+        index=None, key="fmq2"
+    )
+    _q3 = st.radio(
+        "③ Are you here to cheer for...",
+        ["👑 The favourites — back a champion",
+         "🐒 A total underdog — pure chaos energy",
+         "⚖️ A dark horse — dangerous but overlooked"],
+        index=None, key="fmq3"
+    )
+
+    if _q1 and _q2 and _q3:
+        # Style → teams
+        _style_map = {
+            "⚡": ["France","Brazil","Norway","Netherlands","Colombia"],
+            "🛡️": ["Spain","Argentina","Uruguay","Morocco","Italy"],
+            "🎭": ["Spain","Portugal","Argentina","Belgium","Netherlands"],
+            "🏃": ["Germany","England","Japan","South Korea","USA"],
+        }
+        _style_key = _q1[0]
+        _style_pool = _style_map.get(_style_key, list(wc.ELO.keys()))
+
+        # Region → teams
+        _region_map = {
+            "🌍 Europe": ["France","Spain","England","Germany","Portugal","Netherlands",
+                          "Belgium","Croatia","Switzerland","Austria","Norway","Sweden",
+                          "Scotland","Czechia","Bosnia","Turkey"],
+            "🌎 South America": ["Argentina","Brazil","Colombia","Uruguay","Ecuador","Paraguay"],
+            "🌍 Africa / Middle East": ["Morocco","Senegal","Ivory Coast","Ghana","Algeria",
+                                         "Tunisia","South Africa","Egypt","Saudi Arabia",
+                                         "Jordan","Iraq","Qatar","Cabo Verde","Congo DR"],
+            "🌏 Asia / North America": ["Japan","South Korea","Australia","Iran","Uzbekistan",
+                                         "New Zealand","USA","Mexico","Canada","Panama",
+                                         "Haiti","Curacao"],
+        }
+        _region_pool = _region_map.get(_q2, list(wc.ELO.keys()))
+
+        # Underdog/fav → filter by win probability
+        _all_sorted = [(t, probs.get(t, {}).get("p_win", 0)) for t in wc.ELO]
+        _max_win = max(p for _, p in _all_sorted)
+        if "👑" in _q3:
+            _tier_pool = [t for t, p in _all_sorted if p >= _max_win * 0.4]
+        elif "🐒" in _q3:
+            _tier_pool = [t for t, p in _all_sorted if p <= _max_win * 0.08]
+        else:
+            _tier_pool = [t for t, p in _all_sorted if _max_win * 0.08 < p <= _max_win * 0.4]
+
+        # Intersect all three filters
+        _candidates = [t for t in _style_pool if t in _region_pool and t in _tier_pool]
+        if not _candidates:
+            _candidates = [t for t in _region_pool if t in _tier_pool] or _tier_pool[:5]
+
+        # Pick best by win probability
+        _pick = max(_candidates, key=lambda t: probs.get(t, {}).get("p_win", 0))
+        _pp   = probs.get(_pick, {})
+        _pf   = wc.FLAGS.get(_pick, "")
+        _pwin = _pp.get("p_win", 0)
+        _pq   = _pp.get("p_r16", 0)
+        _psf  = _pp.get("p_sf", 0)
+        _elo  = wc.ELO.get(_pick, 0)
+        _form = wc.FORM_RESULTS.get(_pick, [])
+        _form_html = "".join(
+            f'<span style="display:inline-block;width:22px;height:22px;line-height:22px;'
+            f'text-align:center;border-radius:50%;font-size:10px;font-weight:700;margin:0 2px;'
+            f'background:{"rgba(34,197,94,.2)" if r=="W" else "rgba(239,68,68,.2)" if r=="L" else "rgba(234,179,8,.2)"};'
+            f'color:{"#22c55e" if r=="W" else "#ef4444" if r=="L" else "#eab308"}">{r}</span>'
+            for r in _form
+        )
+        # Runners-up
+        _runners = [t for t in _candidates if t != _pick][:3]
+
+        st.html(f"""
+        <div style="background:linear-gradient(135deg,rgba(79,158,255,.12),rgba(167,139,250,.08));
+                    border:1px solid rgba(79,158,255,.3);border-radius:16px;
+                    padding:28px 24px;margin:20px 0;text-align:center;">
+          <div style="font-size:3rem;margin-bottom:4px">{_pf}</div>
+          <div style="font-size:1.8rem;font-weight:800;color:{C['text']};margin-bottom:4px">{_pick}</div>
+          <div style="font-size:12px;color:{C['sub']};margin-bottom:16px">Your perfect match</div>
+          <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <div style="background:{C['card']};border:1px solid {C['border']};border-radius:8px;padding:10px 18px">
+              <div style="font-size:11px;color:{C['sub']}">Win Probability</div>
+              <div style="font-size:1.5rem;font-weight:800;color:{C['accent']}">{_pwin:.1f}%</div>
+            </div>
+            <div style="background:{C['card']};border:1px solid {C['border']};border-radius:8px;padding:10px 18px">
+              <div style="font-size:11px;color:{C['sub']}">Qualify %</div>
+              <div style="font-size:1.5rem;font-weight:800;color:{C['green']}">{_pq:.0f}%</div>
+            </div>
+            <div style="background:{C['card']};border:1px solid {C['border']};border-radius:8px;padding:10px 18px">
+              <div style="font-size:11px;color:{C['sub']}">Reach Semi-Final</div>
+              <div style="font-size:1.5rem;font-weight:800;color:{C['accent2']}">{_psf:.0f}%</div>
+            </div>
+            <div style="background:{C['card']};border:1px solid {C['border']};border-radius:8px;padding:10px 18px">
+              <div style="font-size:11px;color:{C['sub']}">Elo Rating</div>
+              <div style="font-size:1.5rem;font-weight:800;color:{C['text']}">{_elo:,}</div>
+            </div>
+          </div>
+          <div style="margin-bottom:8px">{_form_html}</div>
+          <div style="font-size:10px;color:{C['muted']}">Recent form (last 5)</div>
+        </div>""")
+
+        if _runners:
+            _alt_html = ""
+            for _rt in _runners:
+                _rp   = probs.get(_rt, {}).get("p_win", 0)
+                _rf   = wc.FLAGS.get(_rt, "")
+                _alt_html += f"""
+                <div style="background:{C['card']};border:1px solid {C['border']};
+                             border-radius:10px;padding:12px 16px;text-align:center">
+                  <div style="font-size:1.4rem">{_rf}</div>
+                  <div style="font-size:12px;font-weight:600;color:{C['text']};margin-top:4px">{_rt}</div>
+                  <div style="font-size:11px;color:{C['accent']};margin-top:2px">{_rp:.1f}% win</div>
+                </div>"""
+            st.html(f"""
+            <div style="margin-top:4px">
+              <div style="font-size:11px;color:{C['sub']};margin-bottom:8px;text-align:center">
+                Also consider...
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                {_alt_html}
+              </div>
+            </div>""")
+    else:
+        st.html(f"""
+        <div style="text-align:center;padding:20px;color:{C['muted']};font-size:13px">
+          Answer all 3 questions above to get your team match ✨
+        </div>""")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TAB 8 · AWARDS  (Cinematic redesign — hero player art, why-panel, contenders)
+# ─────────────────────────────────────────────────────────────────────────────
+with tabs[7]:
     with st.spinner("Simulating awards…"):
         boot_p, ball_p = wc.simulate_golden_awards(probs, n=15_000)
 

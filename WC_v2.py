@@ -1445,35 +1445,37 @@ PLAYERS = [
     ("Ousmane Dembele",    "France",     "RW",  0.48,0.35,7.8,27, 1,0.10,0.90),
     ("Rafael Leao",        "Portugal",   "LW",  0.60,0.38,7.5,26, 0,0.08,0.95),
     # ── Brazil ───────────────────────────────────────────────────────────────
-    ("Rodrygo",            "Brazil",     "RW",  0.68,0.42,7.5,25, 0,0.08,0.95),
+    ("Neymar",             "Brazil",     "LW",  0.55,0.45,8.5,34, 5,0.20,0.80),
     ("Endrick",            "Brazil",     "ST",  0.62,0.40,5.5,19, 0,0.10,0.85),
     ("Lucas Paqueta",      "Brazil",     "CAM", 0.30,0.25,8.5,28, 0,0.08,0.95),
+    ("Gabriel Martinelli", "Brazil",     "LW",  0.58,0.38,7.5,24, 0,0.08,0.95),
+    ("Matheus Cunha",      "Brazil",     "ST",  0.65,0.42,7.0,26, 0,0.08,0.90),
     # ── Belgium ──────────────────────────────────────────────────────────────
     ("Kevin De Bruyne",    "Belgium",    "CM",  0.38,0.30,9.5,34, 0,0.12,0.85),
     ("Jeremy Doku",        "Belgium",    "RW",  0.52,0.38,8.5,23, 0,0.08,0.95),
-    ("Yannick Carrasco",   "Belgium",    "LW",  0.40,0.32,7.5,32, 0,0.10,0.85),
+    ("Amadou Onana",       "Belgium",    "CM",  0.22,0.18,7.5,24, 0,0.05,0.95),
     # ── Netherlands ──────────────────────────────────────────────────────────
-    ("Xavi Simons",        "Netherlands","CAM", 0.45,0.35,9.0,23, 0,0.08,0.90),
+    ("Ryan Gravenberch",   "Netherlands","CM",  0.25,0.18,8.0,23, 0,0.05,0.95),
     ("Memphis Depay",      "Netherlands","ST",  0.52,0.45,7.0,31, 1,0.12,0.80),
     ("Tijjani Reijnders",  "Netherlands","CM",  0.35,0.28,7.5,27, 0,0.08,0.95),
     # ── Colombia ─────────────────────────────────────────────────────────────
     ("James Rodriguez",    "Colombia",   "CAM", 0.28,0.30,8.5,34, 6,0.12,0.85),
     ("Luis Diaz",          "Colombia",   "LW",  0.52,0.35,7.5,28, 0,0.08,1.00),
-    ("Jhon Duran",         "Colombia",   "ST",  0.62,0.40,5.0,21, 0,0.05,0.90),
+    ("Cucho Hernandez",    "Colombia",   "ST",  0.58,0.42,6.5,26, 0,0.08,0.90),
     ("Richard Rios",       "Colombia",   "CM",  0.20,0.18,7.5,25, 0,0.05,0.95),
     # ── Morocco ──────────────────────────────────────────────────────────────
     ("Achraf Hakimi",      "Morocco",    "RW",  0.42,0.30,8.0,26, 0,0.05,1.00),
-    ("Hakim Ziyech",       "Morocco",    "CAM", 0.28,0.35,8.5,32, 0,0.10,0.85),
-    ("Youssef En-Nesyri",  "Morocco",    "ST",  0.55,0.45,5.5,28, 1,0.05,0.95),
-    ("Sofiane Boufal",     "Morocco",    "LW",  0.28,0.25,7.5,31, 0,0.10,0.80),
+    ("Brahim Diaz",        "Morocco",    "CAM", 0.48,0.35,8.5,26, 0,0.08,0.95),
+    ("Ayoub El Kaabi",     "Morocco",    "ST",  0.55,0.48,5.5,28, 0,0.08,0.90),
+    ("Bilal El Khannouss", "Morocco",    "CM",  0.38,0.30,8.0,21, 0,0.05,0.90),
     # ── Mexico ───────────────────────────────────────────────────────────────
-    ("Hirving Lozano",     "Mexico",     "RW",  0.42,0.38,7.0,30, 0,0.10,0.90),
+    ("Orbelin Pineda",     "Mexico",     "CAM", 0.30,0.28,7.5,29, 0,0.08,0.90),
     ("Santiago Gimenez",   "Mexico",     "ST",  0.78,0.45,5.0,24, 0,0.05,0.95),
     ("Raul Jimenez",       "Mexico",     "ST",  0.42,0.35,5.0,34, 2,0.15,0.80),
     ("Edson Alvarez",      "Mexico",     "CM",  0.18,0.12,7.0,28, 0,0.05,1.00),
     # ── Japan ────────────────────────────────────────────────────────────────
     ("Takefusa Kubo",      "Japan",      "RW",  0.48,0.35,8.5,24, 0,0.08,0.95),
-    ("Kaoru Mitoma",       "Japan",      "LW",  0.45,0.38,8.0,28, 0,0.08,1.00),
+    ("Daichi Kamada",      "Japan",      "CAM", 0.42,0.35,8.0,29, 0,0.08,0.90),
     ("Junya Ito",          "Japan",      "RW",  0.38,0.35,7.5,32, 0,0.10,0.90),
     ("Wataru Endo",        "Japan",      "CM",  0.15,0.10,7.0,32, 0,0.08,0.95),
     # ── Croatia ──────────────────────────────────────────────────────────────
@@ -1484,12 +1486,12 @@ PLAYERS = [
     # ── Switzerland ──────────────────────────────────────────────────────────
     ("Breel Embolo",       "Switzerland","ST",  0.52,0.48,5.5,28, 0,0.08,0.90),
     ("Granit Xhaka",       "Switzerland","CM",  0.18,0.14,7.5,33, 0,0.08,1.00),
-    ("Xherdan Shaqiri",    "Switzerland","CAM", 0.28,0.32,7.5,33, 2,0.12,0.80),
+    ("Dan Ndoye",          "Switzerland","RW",  0.45,0.35,7.5,24, 0,0.08,0.90),
     ("Ruben Vargas",       "Switzerland","LW",  0.38,0.32,7.0,27, 0,0.08,0.90),
     # ── Ecuador ──────────────────────────────────────────────────────────────
     ("Moises Caicedo",     "Ecuador",    "CM",  0.15,0.10,7.5,24, 0,0.05,1.00),
     ("Enner Valencia",     "Ecuador",    "ST",  0.48,0.52,5.0,36, 3,0.12,0.80),
-    ("Jeremy Sarmiento",   "Ecuador",    "LW",  0.32,0.28,7.5,23, 0,0.10,0.85),
+    ("Kendry Paez",        "Ecuador",    "CM",  0.30,0.25,8.5,18, 0,0.05,0.85),
     ("Kevin Rodriguez",    "Ecuador",    "RW",  0.35,0.30,7.0,26, 0,0.08,0.85),
     # ── Senegal ──────────────────────────────────────────────────────────────
     ("Sadio Mane",         "Senegal",    "LW",  0.52,0.45,7.5,33, 0,0.12,0.90),
@@ -1498,7 +1500,7 @@ PLAYERS = [
     ("Pape Matar Sarr",    "Senegal",    "CM",  0.18,0.12,7.5,23, 0,0.05,0.90),
     # ── Austria ──────────────────────────────────────────────────────────────
     ("Marcel Sabitzer",    "Austria",    "CM",  0.32,0.28,7.5,31, 0,0.08,0.95),
-    ("Christoph Baumgartner","Austria",  "CAM", 0.42,0.38,7.5,25, 0,0.08,0.90),
+    ("Marko Arnautovic",   "Austria",    "ST",  0.42,0.38,5.5,36, 0,0.12,0.80),
     ("Michael Gregoritsch","Austria",    "ST",  0.52,0.45,5.5,31, 0,0.08,0.85),
     ("Patrick Wimmer",     "Austria",    "RW",  0.38,0.30,7.5,24, 0,0.08,0.85),
     # ── Turkey ───────────────────────────────────────────────────────────────
@@ -1508,22 +1510,22 @@ PLAYERS = [
     ("Kenan Yildiz",       "Turkey",     "RW",  0.45,0.35,8.5,20, 0,0.05,0.85),
     # ── Australia ────────────────────────────────────────────────────────────
     ("Mathew Leckie",      "Australia",  "RW",  0.32,0.30,7.0,34, 0,0.08,0.90),
-    ("Mitchell Duke",      "Australia",  "ST",  0.42,0.38,5.0,34, 0,0.10,0.80),
-    ("Riley McGree",       "Australia",  "CM",  0.25,0.20,7.5,26, 0,0.08,0.90),
+    ("Nestory Irankunda",  "Australia",  "RW",  0.45,0.35,8.0,19, 0,0.05,0.85),
+    ("Jackson Irvine",     "Australia",  "CM",  0.25,0.22,7.0,32, 0,0.08,0.90),
     ("Cameron Devlin",     "Australia",  "CM",  0.22,0.18,6.5,27, 0,0.08,0.85),
     # ── Ghana ────────────────────────────────────────────────────────────────
-    ("Mohammed Kudus",     "Ghana",      "CAM", 0.52,0.42,8.0,25, 0,0.08,0.95),
+    ("Inaki Williams",     "Ghana",      "ST",  0.52,0.42,7.0,31, 0,0.08,0.95),
+    ("Kamaldeen Sulemana", "Ghana",      "LW",  0.48,0.38,8.0,23, 0,0.08,0.90),
     ("Jordan Ayew",        "Ghana",      "ST",  0.38,0.35,6.5,33, 0,0.10,0.85),
-    ("Andre Ayew",         "Ghana",      "RW",  0.32,0.28,7.0,35, 2,0.12,0.75),
     ("Abdul Fatawu",       "Ghana",      "RW",  0.45,0.32,8.0,21, 0,0.05,0.85),
     # ── Iran ─────────────────────────────────────────────────────────────────
     ("Mehdi Taremi",       "Iran",       "ST",  0.62,0.55,6.0,33, 3,0.10,1.00),
-    ("Sardar Azmoun",      "Iran",       "ST",  0.52,0.48,6.5,30, 2,0.12,0.85),
     ("Alireza Jahanbakhsh","Iran",       "RW",  0.28,0.25,7.5,32, 0,0.10,0.85),
-    ("Ali Gholizadeh",     "Iran",       "LW",  0.32,0.28,7.5,29, 0,0.08,0.85),
+    ("Saman Ghoddos",      "Iran",       "CAM", 0.32,0.25,7.5,32, 0,0.10,0.85),
+    ("Saeid Ezatolahi",    "Iran",       "CM",  0.18,0.14,7.0,30, 0,0.08,0.90),
     # ── Ivory Coast ──────────────────────────────────────────────────────────
     ("Simon Adingra",      "Ivory Coast","RW",  0.42,0.38,8.0,23, 0,0.08,0.90),
-    ("Sebastien Haller",   "Ivory Coast","ST",  0.52,0.48,5.5,31, 0,0.12,0.85),
+    ("Amad Diallo",        "Ivory Coast","RW",  0.52,0.38,8.0,23, 0,0.05,0.90),
     ("Franck Kessie",      "Ivory Coast","CM",  0.18,0.15,7.0,29, 0,0.08,0.90),
     ("Nicolas Pepe",       "Ivory Coast","RW",  0.32,0.28,7.5,30, 0,0.10,0.80),
     # ── Scotland ─────────────────────────────────────────────────────────────
@@ -1533,44 +1535,44 @@ PLAYERS = [
     ("Lyndon Dykes",       "Scotland",   "ST",  0.38,0.35,4.5,30, 0,0.08,0.85),
     # ── Algeria ──────────────────────────────────────────────────────────────
     ("Riyad Mahrez",       "Algeria",    "RW",  0.42,0.38,8.5,35, 0,0.12,0.85),
-    ("Youcef Atal",        "Algeria",    "RW",  0.32,0.28,7.5,29, 0,0.10,0.85),
+    ("Mohamed Amoura",     "Algeria",    "LW",  0.52,0.38,7.5,25, 0,0.08,0.90),
     ("Houssem Aouar",      "Algeria",    "CAM", 0.28,0.22,8.0,27, 0,0.08,0.85),
-    ("Islam Slimani",      "Algeria",    "ST",  0.38,0.42,5.5,37, 0,0.15,0.70),
+    ("Amine Gouiri",       "Algeria",    "ST",  0.48,0.35,7.5,25, 0,0.08,0.90),
     # ── Paraguay ─────────────────────────────────────────────────────────────
     ("Miguel Almiron",     "Paraguay",   "CAM", 0.32,0.28,7.5,31, 0,0.08,0.95),
-    ("Carlos Alcaraz",     "Paraguay",   "CM",  0.32,0.25,7.5,23, 0,0.05,0.90),
+    ("Antonio Sanabria",   "Paraguay",   "ST",  0.48,0.40,5.5,29, 0,0.08,0.90),
     ("Julio Enciso",       "Paraguay",   "RW",  0.38,0.32,8.0,22, 0,0.08,0.85),
     ("Omar Alderete",      "Paraguay",   "CM",  0.15,0.10,6.5,28, 0,0.08,0.85),
     # ── Tunisia ──────────────────────────────────────────────────────────────
-    ("Wahbi Khazri",       "Tunisia",    "CAM", 0.38,0.32,7.5,33, 0,0.10,0.80),
+    ("Hannibal Mejbri",    "Tunisia",    "CM",  0.32,0.25,8.5,22, 0,0.05,0.90),
     ("Ellyes Skhiri",      "Tunisia",    "CM",  0.15,0.10,7.0,30, 0,0.08,0.90),
-    ("Youssef Msakni",     "Tunisia",    "CAM", 0.28,0.25,7.5,35, 0,0.12,0.75),
-    ("Naim Sliti",         "Tunisia",    "RW",  0.32,0.28,7.0,33, 0,0.10,0.80),
+    ("Anis Ben Slimane",   "Tunisia",    "CAM", 0.38,0.30,7.5,23, 0,0.08,0.85),
+    ("Ismael Gharbi",      "Tunisia",    "CM",  0.30,0.22,8.0,21, 0,0.05,0.85),
     # ── Saudi Arabia ─────────────────────────────────────────────────────────
-    ("Mohammed Al-Dawsari","Saudi Arabia","LW",  0.42,0.38,7.5,31, 1,0.08,0.90),
+    ("Nasser Al-Dawsari",  "Saudi Arabia","LW",  0.42,0.38,7.5,34, 1,0.10,0.85),
     ("Saleh Al-Shehri",    "Saudi Arabia","ST",  0.42,0.38,5.5,31, 1,0.08,0.90),
-    ("Sami Al-Najei",      "Saudi Arabia","CM",  0.15,0.12,6.5,27, 0,0.08,0.85),
+    ("Salem Al-Dawsari",   "Saudi Arabia","RW",  0.38,0.32,7.5,29, 0,0.08,0.90),
     ("Abdullah Al-Hamdan", "Saudi Arabia","ST",  0.38,0.32,5.5,26, 0,0.05,0.80),
     # ── Czechia ──────────────────────────────────────────────────────────────
     ("Patrik Schick",      "Czechia",    "ST",  0.62,0.52,5.5,30, 2,0.10,0.90),
     ("Tomas Soucek",       "Czechia",    "CM",  0.22,0.20,6.5,30, 0,0.08,0.95),
-    ("Antonin Barak",      "Czechia",    "CAM", 0.32,0.28,7.5,30, 0,0.08,0.85),
+    ("Adam Hlozek",        "Czechia",    "RW",  0.38,0.28,7.5,23, 0,0.05,0.90),
     ("Tomas Holes",        "Czechia",    "CM",  0.12,0.08,6.5,29, 0,0.08,0.85),
     # ── South Africa ─────────────────────────────────────────────────────────
-    ("Percy Tau",          "South Africa","LW",  0.32,0.28,7.5,31, 0,0.08,0.90),
-    ("Bongani Zungu",      "South Africa","CM",  0.15,0.10,6.5,32, 0,0.10,0.80),
+    ("Lyle Foster",        "South Africa","ST",  0.42,0.35,5.5,25, 0,0.08,0.90),
+    ("Relebohile Mofokeng","South Africa","RW",  0.38,0.30,7.5,21, 0,0.05,0.85),
     ("Evidence Makgopa",   "South Africa","ST",  0.42,0.35,5.5,26, 0,0.08,0.90),
     ("Themba Zwane",       "South Africa","CAM", 0.28,0.22,7.5,34, 0,0.10,0.80),
     # ── Bosnia ───────────────────────────────────────────────────────────────
     ("Edin Dzeko",         "Bosnia",     "ST",  0.32,0.32,5.5,39, 0,0.20,0.70),
-    ("Miralem Pjanic",     "Bosnia",     "CM",  0.18,0.14,8.5,35, 0,0.15,0.75),
-    ("Haris Seferovic",    "Bosnia",     "ST",  0.38,0.32,5.0,33, 0,0.10,0.80),
+    ("Benjamin Tahirovic", "Bosnia",     "CM",  0.22,0.18,7.5,22, 0,0.05,0.90),
+    ("Sead Kolasinac",     "Bosnia",     "LW",  0.15,0.12,6.5,32, 0,0.08,0.85),
     ("Ermedin Demirovic",  "Bosnia",     "ST",  0.52,0.42,6.0,27, 0,0.08,0.90),
     # ── Qatar ────────────────────────────────────────────────────────────────
     ("Akram Afif",         "Qatar",      "LW",  0.38,0.35,8.0,28, 0,0.08,0.95),
     ("Almoez Ali",         "Qatar",      "ST",  0.42,0.40,5.5,28, 5,0.05,1.00),
     ("Hassan Al-Haydos",   "Qatar",      "CAM", 0.28,0.25,7.5,34, 0,0.10,0.90),
-    ("Ismaeel Mohammad",   "Qatar",      "CM",  0.15,0.10,6.5,27, 0,0.08,0.85),
+    ("Edmilson Junior",    "Qatar",      "CAM", 0.32,0.28,7.5,30, 0,0.08,0.85),
     # ── Congo DR ─────────────────────────────────────────────────────────────
     ("Theo Bongonda",      "Congo DR",   "RW",  0.38,0.32,7.5,29, 0,0.08,0.85),
     ("Cedric Bakambu",     "Congo DR",   "ST",  0.42,0.38,5.5,34, 0,0.10,0.80),
@@ -1579,35 +1581,35 @@ PLAYERS = [
     # ── Uzbekistan ───────────────────────────────────────────────────────────
     ("Eldor Shomurodov",   "Uzbekistan", "ST",  0.48,0.42,5.5,29, 0,0.08,0.95),
     ("Otabek Shukurov",    "Uzbekistan", "CM",  0.18,0.14,7.0,28, 0,0.08,0.85),
-    ("Khasan Mukhammad",   "Uzbekistan", "RW",  0.28,0.22,7.5,25, 0,0.08,0.85),
+    ("Abbosbek Fayzullaev","Uzbekistan", "RW",  0.35,0.28,8.0,24, 0,0.08,0.90),
     ("Jaloliddin Masharipov","Uzbekistan","CAM", 0.22,0.18,8.0,30, 0,0.08,0.85),
     # ── Jordan ───────────────────────────────────────────────────────────────
     ("Musa Al-Taamari",    "Jordan",     "RW",  0.32,0.28,7.5,27, 0,0.08,0.90),
-    ("Yazan Al-Naimat",    "Jordan",     "ST",  0.38,0.32,5.5,25, 0,0.08,0.85),
-    ("Baha Faisal",        "Jordan",     "CM",  0.18,0.15,6.5,25, 0,0.08,0.85),
+    ("Ali Al-Hamadi",      "Jordan",     "ST",  0.42,0.35,5.5,24, 0,0.08,0.85),
+    ("Ali Azaizeh",        "Jordan",     "CM",  0.18,0.15,6.5,27, 0,0.08,0.85),
     # ── Iraq ─────────────────────────────────────────────────────────────────
     ("Mohanad Ali",        "Iraq",       "ST",  0.42,0.38,5.5,26, 0,0.08,0.85),
     ("Aymen Hussein",      "Iraq",       "ST",  0.38,0.32,5.5,28, 0,0.08,0.85),
     ("Ali Jasim",          "Iraq",       "RW",  0.30,0.25,7.5,22, 0,0.05,0.85),
     # ── New Zealand ──────────────────────────────────────────────────────────
     ("Chris Wood",         "New Zealand","ST",  0.38,0.38,4.5,33, 0,0.10,0.90),
-    ("Clayton Lewis",      "New Zealand","CM",  0.22,0.18,7.0,27, 0,0.08,0.85),
-    ("Elijah Just",        "New Zealand","RW",  0.28,0.22,7.0,24, 0,0.08,0.80),
+    ("Ben Old",            "New Zealand","RW",  0.32,0.25,7.0,24, 0,0.08,0.85),
+    ("Ben Waine",          "New Zealand","ST",  0.35,0.28,5.5,23, 0,0.08,0.80),
     # ── Cabo Verde ───────────────────────────────────────────────────────────
     ("Garry Rodrigues",    "Cabo Verde", "RW",  0.28,0.25,7.5,34, 0,0.10,0.80),
-    ("Julio Tavares",      "Cabo Verde", "ST",  0.28,0.25,5.5,37, 0,0.15,0.70),
+    ("Jovane Cabral",      "Cabo Verde", "LW",  0.38,0.30,7.5,28, 0,0.08,0.90),
     ("Ryan Mendes",        "Cabo Verde", "LW",  0.25,0.20,7.0,35, 0,0.12,0.75),
     # ── Curacao ──────────────────────────────────────────────────────────────
     ("Leandro Bacuna",     "Curacao",    "CM",  0.18,0.15,7.0,33, 0,0.10,0.80),
     ("Jurien Gaari",       "Curacao",    "ST",  0.28,0.22,5.0,28, 0,0.10,0.80),
-    ("Cuco Martina",       "Curacao",    "RW",  0.10,0.08,5.5,35, 0,0.12,0.75),
+    ("Tahith Chong",       "Curacao",    "RW",  0.35,0.28,7.5,25, 0,0.08,0.90),
     # ── Panama ───────────────────────────────────────────────────────────────
-    ("Rolando Blackburn",  "Panama",     "ST",  0.32,0.30,5.5,28, 0,0.08,0.85),
+    ("Cecilio Waterman",   "Panama",     "ST",  0.38,0.32,5.5,27, 0,0.08,0.85),
     ("Ismael Diaz",        "Panama",     "ST",  0.42,0.32,5.5,23, 0,0.08,0.85),
     ("Alberto Quintero",   "Panama",     "LW",  0.28,0.25,7.0,36, 0,0.15,0.75),
     # ── Haiti ────────────────────────────────────────────────────────────────
     ("Frantzdy Pierrot",   "Haiti",      "ST",  0.38,0.32,5.5,27, 0,0.08,0.85),
-    ("James Lea Siliki",   "Haiti",      "CM",  0.22,0.18,7.0,29, 0,0.08,0.85),
+    ("Wilson Isidor",      "Haiti",      "ST",  0.45,0.35,6.5,24, 0,0.08,0.90),
     ("Duckens Nazon",      "Haiti",      "ST",  0.32,0.28,5.5,32, 0,0.10,0.80),
 ]
 
